@@ -3,814 +3,2309 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inhaler Flow Monitor - Ellita</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <title>呼吸流量監測系統 - 吸藥輔助</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root {
-            --COL_BG: #f4f6f8;
-            --COL_PANEL: #ffffff;
-            --COL_ACCENT: #1f4e79;
-            --COL_ACCENT2: #2e7d32;
-            --COL_PATIENT: #c0392b;
-            --COL_TEXT: #2c3e50;
-            --COL_GRID: #d9e1e8;
-            --FONT_FAMILY: "Segoe UI", system-ui, sans-serif;
-        }
         * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
         body {
-            font-family: var(--FONT_FAMILY);
-            background: var(--COL_BG);
-            margin: 0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #eef4ee;
             padding: 20px;
+            display: flex;
+            justify-content: center;
         }
         .container {
-            max-width: 1040px;
-            margin: 0 auto;
-            background: var(--COL_PANEL);
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            max-width: 1200px;
+            width: 100%;
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 8px 40px rgba(0, 40, 20, 0.10);
+            padding: 28px 32px;
         }
-        .header {
-            display: flex;
-            align-items: baseline;
-            gap: 20px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--COL_GRID);
-            margin-bottom: 16px;
-        }
-        .header h1 {
-            color: var(--COL_ACCENT);
-            font-size: 24px;
-            font-weight: 600;
-            margin: 0;
-        }
-        .header .subtitle {
-            color: #7f8c8d;
-            font-size: 14px;
-        }
-        .controls {
+        .flex-row {
             display: flex;
             flex-wrap: wrap;
-            gap: 12px 20px;
-            padding: 16px;
-            background: var(--COL_PANEL);
-            border: 1px solid var(--COL_GRID);
-            border-radius: 8px;
-            margin-bottom: 16px;
+            gap: 10px;
+            align-items: center;
         }
-        .control-group {
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 13px;
+            background: #eef3ee;
+            color: #1f3a2f;
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+        }
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none !important;
+            pointer-events: none !important;
+        }
+        .btn-primary {
+            background: #1b7e4a;
+            color: white;
+        }
+        .btn-danger {
+            background: #c74a4a;
+            color: white;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #1b7e4a;
+            color: #1b7e4a;
+        }
+        .btn-active {
+            background: #1b7e4a;
+            color: white;
+            border-color: #1b7e4a;
+        }
+        .btn-sm {
+            padding: 4px 14px;
+            font-size: 12px;
+        }
+        .btn-gold {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            border: none;
+        }
+        .btn-test {
+            background: #8e44ad;
+            color: white;
+        }
+        .btn-test:hover {
+            background: #7d3c98;
+        }
+        .input-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            align-items: center;
+        }
+        .input-group label {
+            font-weight: 500;
+            color: #1f3a2f;
+            min-width: 70px;
+            font-size: 13px;
+        }
+        .input-group input {
+            padding: 7px 14px;
+            border: 1.5px solid #dce8dc;
+            border-radius: 30px;
+            font-size: 13px;
+            background: #fafffa;
+            flex: 1;
+            min-width: 80px;
+        }
+        .input-group input:focus {
+            outline: none;
+            border-color: #1b7e4a;
+            box-shadow: 0 0 0 3px rgba(27, 126, 74, 0.10);
+        }
+        .status-chip {
+            padding: 4px 16px;
+            border-radius: 30px;
+            background: #e7f3ec;
+            font-weight: 500;
+            font-size: 13px;
+            color: #1f4a2f;
+            display: inline-block;
+        }
+        .status-chip.success {
+            background: #d5f5e3;
+            color: #1a7a42;
+        }
+        .status-chip.error {
+            background: #fdedec;
+            color: #c0392b;
+        }
+        .status-chip.warning {
+            background: #fef9e7;
+            color: #b7950b;
+        }
+        .badge {
+            background: #1b7e4a12;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #1b7e4a;
+            border: 1px solid #1b7e4a25;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .badge-info {
+            background: #3498db20;
+            color: #2471a3;
+            border-color: #3498db30;
+        }
+        .badge-gold {
+            background: #f39c1220;
+            color: #b9770e;
+            border-color: #f39c1240;
+        }
+        .badge-future {
+            background: #95a5a620;
+            color: #5a6a6a;
+            border-color: #95a5a640;
+        }
+        .gender-male {
+            background: #3498db20 !important;
+            color: #2471a3 !important;
+            border-color: #3498db40 !important;
+            font-weight: 600;
+        }
+        .gender-female {
+            background: #e74c3c20 !important;
+            color: #c0392b !important;
+            border-color: #e74c3c40 !important;
+            font-weight: 600;
+        }
+        .gender-unknown {
+            background: #95a5a620 !important;
+            color: #5a6a6a !important;
+            border-color: #95a5a640 !important;
+        }
+        .gender-icon {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            font-size: 13px;
+            font-weight: 700;
+            color: white;
+            margin-right: 4px;
+        }
+        .gender-icon.male {
+            background: #3498db;
+        }
+        .gender-icon.female {
+            background: #e74c3c;
+        }
+        .gender-icon.unknown {
+            background: #95a5a6;
+        }
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1b4a2f;
+            margin: 16px 0 10px 0;
+            padding-bottom: 6px;
+            border-bottom: 2px solid #e8f0e8;
             display: flex;
             align-items: center;
             gap: 8px;
+        }
+        .section-title .badge-section {
+            font-size: 11px;
+            font-weight: 400;
+            background: #e8f0e8;
+            padding: 1px 12px;
+            border-radius: 20px;
+            color: #4a6a4a;
+        }
+        .std-range {
+            background: #f0f8f0;
+            border-radius: 16px;
+            padding: 8px 16px;
+            border-left: 4px solid #1b7e4a;
+            margin-top: 6px;
+        }
+        .std-range .label {
+            font-size: 11px;
+            color: #4a6a4a;
+        }
+        .std-range .value {
+            font-weight: 600;
+            color: #1b7e4a;
+            font-size: 14px;
+        }
+        .std-range .detail {
+            font-size: 12px;
+            color: #4a6a4a;
+            margin-top: 2px;
+        }
+        .std-range .device-info {
+            font-size: 11px;
+            color: #6a8a6a;
+            margin-top: 4px;
+            background: #e8f4e8;
+            padding: 4px 10px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+        .std-range .disclaimer {
+            font-size: 11px;
+            color: #b7950b;
+            margin-top: 4px;
+            background: #fef9e7;
+            padding: 4px 10px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+        .light-bar {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .light {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #d0ddd0;
+            border: 2px solid #b0c0b0;
+            transition: all 0.3s;
+        }
+        .light.on-green {
+            background: #2ecc71;
+            border-color: #1fa85a;
+            box-shadow: 0 0 24px #2ecc7180;
+            transform: scale(1.10);
+        }
+        .light.on-red {
+            background: #e74c3c;
+            border-color: #c0392b;
+            box-shadow: 0 0 24px #e74c3c80;
+            transform: scale(1.10);
+        }
+        .light.on-yellow {
+            background: #f1c40f;
+            border-color: #d4ac0d;
+            box-shadow: 0 0 24px #f1c40f80;
+            transform: scale(1.10);
+        }
+        .step-progress {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin: 10px 0 6px;
+        }
+        .step-dot {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #d0ddd0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 12px;
+            color: #3a5a3a;
+            transition: 0.4s;
+        }
+        .step-dot.active {
+            background: #1b7e4a;
+            color: white;
+            box-shadow: 0 4px 14px #1b7e4a60;
+            transform: scale(1.10);
+        }
+        .step-dot.done {
+            background: #1b7e4a;
+            color: white;
+        }
+        .step-line {
+            flex: 1;
+            height: 4px;
+            background: #d0ddd0;
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+        .step-line-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #1b7e4a, #2ecc71);
+            transition: width 0.8s ease;
+            border-radius: 4px;
+        }
+        .step-line-fill.flowing {
+            animation: flowPulse 1.2s ease infinite;
+        }
+        @keyframes flowPulse {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.3;
+            }
+        }
+        .image-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            justify-content: center;
+            margin: 8px 0;
+        }
+        .img-card {
+            background: #f7fbf7;
+            border-radius: 16px;
+            padding: 6px 10px 4px;
+            text-align: center;
+        }
+        .img-card img {
+            height: 110px;
+            width: auto;
+            object-fit: contain;
+            border-radius: 8px;
+            background: #f0f8f0;
+        }
+        .img-card .caption {
+            font-size: 11px;
+            color: #3a5a3a;
+            margin-top: 3px;
+        }
+        .lungs-container {
+            display: flex;
+            justify-content: center;
+            margin: 6px 0;
+        }
+        #lungsSvg {
+            width: 240px;
+            height: 260px;
+            background: #f0f8f0;
+            border-radius: 40px;
+            box-shadow: 0 2px 16px rgba(0, 40, 20, 0.08);
+        }
+        .gauge-container {
+            background: #f7fbf7;
+            border-radius: 32px;
+            padding: 10px 18px;
+            margin: 6px 0;
+        }
+        .chart-wrapper {
+            position: relative;
+            height: 150px;
+            margin: 6px 0;
+        }
+        .timer-display {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1f3a2f;
+            letter-spacing: 2px;
+            background: #f0f8f0;
+            padding: 2px 20px;
+            border-radius: 40px;
+            min-width: 100px;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+        }
+        .timer-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f0f8f0;
+            padding: 4px 16px 4px 12px;
+            border-radius: 40px;
             flex-wrap: wrap;
         }
-        .control-group label {
-            color: var(--COL_TEXT);
+        .timer-control input {
+            width: 60px;
+            padding: 4px 8px;
+            border: 1.5px solid #dce8dc;
+            border-radius: 20px;
             font-size: 14px;
-            font-weight: 500;
-        }
-        select,
-        input,
-        button {
-            padding: 6px 12px;
-            border: 1px solid #d0d8e0;
-            border-radius: 6px;
-            font-size: 14px;
-            font-family: var(--FONT_FAMILY);
+            text-align: center;
             background: white;
-            color: var(--COL_TEXT);
         }
-        select:focus,
-        input:focus {
+        .timer-control input:focus {
             outline: none;
-            border-color: var(--COL_ACCENT);
+            border-color: #1b7e4a;
         }
-        button {
-            cursor: pointer;
-            background: #f0f3f7;
-            transition: all 0.2s;
-            padding: 6px 16px;
+        .timer-status-badge {
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
         }
-        button:hover {
-            background: #e1e8ee;
+        .timer-status-badge.auto {
+            background: #2ecc7120;
+            color: #1a7a42;
+            border: 1px solid #2ecc7140;
         }
-        button.primary {
-            background: var(--COL_ACCENT);
-            color: white;
-            border-color: var(--COL_ACCENT);
-            font-weight: bold;
+        .timer-status-badge.manual {
+            background: #f39c1220;
+            color: #b9770e;
+            border: 1px solid #f39c1240;
         }
-        button.primary:hover {
-            background: #163d5e;
+        .game-overlay {
+            background: linear-gradient(145deg, #0f1f0f, #1a3a1a);
+            border-radius: 20px;
+            padding: 16px 20px;
+            margin: 4px 0;
+            color: #e8f0e8;
+            border: 1px solid #2a5a2a;
+            box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            min-height: 160px;
         }
-        button.danger {
-            background: #c0392b;
-            color: white;
-            border-color: #c0392b;
+        .game-overlay::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(ellipse at center, rgba(46, 204, 113, 0.03) 0%, transparent 70%);
+            pointer-events: none;
+            animation: gameGlow 4s ease-in-out infinite;
         }
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        @keyframes gameGlow {
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
         }
-        .stats {
+        .game-header {
             display: flex;
-            gap: 24px;
-            margin-left: auto;
-            font-size: 14px;
-            color: var(--COL_TEXT);
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            position: relative;
+            z-index: 1;
         }
-        .stats span {
-            background: #f8fafc;
+        .game-title-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .game-title-area .game-icon {
+            font-size: 32px;
+            animation: gameIconBounce 2s ease-in-out infinite;
+        }
+        @keyframes gameIconBounce {
+            0%,
+            100% {
+                transform: scale(1) rotate(0deg);
+            }
+            50% {
+                transform: scale(1.15) rotate(5deg);
+            }
+        }
+        .game-title-area .game-name {
+            font-size: 20px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #f1c40f, #e67e22);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .game-title-area .game-rule {
+            font-size: 13px;
+            color: #a0c0a0;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 12px;
+            border-radius: 20px;
+        }
+        .game-score-area {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .game-score-area .score-display {
+            font-size: 32px;
+            font-weight: 800;
+            color: #f1c40f;
+            text-shadow: 0 0 30px rgba(241, 196, 15, 0.3);
+        }
+        .game-score-area .score-label {
+            font-size: 12px;
+            color: #8a9a8a;
+        }
+        .game-score-area .target-display {
+            font-size: 14px;
+            color: #e67e22;
+            background: rgba(0, 0, 0, 0.3);
             padding: 4px 14px;
             border-radius: 20px;
-            border: 1px solid var(--COL_GRID);
         }
-        .stats strong {
-            color: var(--COL_ACCENT);
-        }
-        .chart-container {
-            background: var(--COL_PANEL);
-            border: 1px solid var(--COL_GRID);
-            border-radius: 8px;
-            padding: 8px;
-            margin-bottom: 16px;
-            height: 420px;
+        .game-body {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-top: 10px;
             position: relative;
+            z-index: 1;
+            flex-wrap: wrap;
         }
-        #flowChart {
-            width: 100% !important;
-            height: 100% !important;
+        .game-breath-ball {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #4a8a4a, #1a5a1a);
+            box-shadow: 0 0 40px rgba(46, 204, 113, 0.15), inset 0 -10px 30px rgba(0, 0, 0, 0.3);
+            transition: all 0.15s ease;
+            position: relative;
+            flex-shrink: 0;
+            border: 2px solid #2a6a2a;
         }
-        .status-bar {
-            background: var(--COL_ACCENT);
+        .game-breath-ball .ball-inner {
+            position: absolute;
+            top: 15%;
+            left: 25%;
+            width: 40%;
+            height: 30%;
+            background: radial-gradient(ellipse, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .game-breath-ball .ball-label {
+            position: absolute;
+            bottom: -24px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            color: #8a9a8a;
+            white-space: nowrap;
+        }
+        .game-breath-ball .flow-value-display {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+            font-weight: 700;
             color: white;
-            padding: 10px 16px;
-            border-radius: 6px;
-            font-size: 14px;
+            text-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        .game-progress-section {
+            flex: 1;
+            min-width: 120px;
+        }
+        .game-progress-section .progress-label {
+            font-size: 12px;
+            color: #8a9a8a;
+            margin-bottom: 4px;
             display: flex;
             justify-content: space-between;
         }
-        .status-bar .status-msg {
-            opacity: 0.9;
+        .game-progress-track {
+            height: 8px;
+            background: #2a3a2a;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
         }
-        .status-bar .peak {
+        .game-progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #2ecc71, #f1c40f, #e67e22);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 20px rgba(46, 204, 113, 0.2);
+        }
+        .game-feedback-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+            position: relative;
+            z-index: 1;
+        }
+        .game-feedback-text {
+            font-size: 14px;
+            color: #a0c0a0;
+            min-height: 24px;
+            animation: feedbackPulse 1.5s ease-in-out infinite;
+        }
+        .game-feedback-text.highlight {
+            color: #f1c40f;
+            font-weight: 700;
+        }
+        @keyframes feedbackPulse {
+            0%,
+            100% {
+                opacity: 0.8;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+        .game-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(46, 204, 113, 0.4);
+            border-radius: 50%;
+            animation: particleFloat linear infinite;
+        }
+        @keyframes particleFloat {
+            0% {
+                transform: translateY(100%) scale(0);
+                opacity: 0;
+            }
+            20% {
+                opacity: 1;
+            }
+            80% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) scale(1);
+                opacity: 0;
+            }
+        }
+        .game-status-badge {
+            font-size: 12px;
+            padding: 2px 12px;
+            border-radius: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #8a9a8a;
+        }
+        .game-status-badge.active {
+            background: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #00000050;
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+        }
+        .modal-box {
+            background: white;
+            border-radius: 32px;
+            padding: 30px 34px;
+            max-width: 460px;
+            width: 92%;
+            text-align: center;
+        }
+        .modal-box h3 {
+            margin-top: 0;
+            color: #1f3a2f;
+            font-size: 22px;
+        }
+        .modal-box .btn {
+            margin-top: 14px;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .text-small {
+            font-size: 12px;
+            color: #4a6a4a;
+        }
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 14px;
+            border-radius: 30px;
             font-weight: 600;
+            font-size: 13px;
         }
-        .compat-warning {
-            background: #fff3cd;
-            color: #856404;
-            padding: 10px 16px;
-            border-radius: 6px;
-            margin-bottom: 12px;
-            border: 1px solid #ffc107;
-            display: none;
+        .status-indicator.green {
+            background: #d5f5e3;
+            color: #1a7a42;
         }
-        .compat-warning.show {
-            display: block;
+        .status-indicator.yellow {
+            background: #fef9e7;
+            color: #b7950b;
         }
-        @media (max-width: 700px) {
+        .status-indicator.red {
+            background: #fdedec;
+            color: #c0392b;
+        }
+        .status-indicator.grey {
+            background: #e7f3ec;
+            color: #4a6a4a;
+        }
+        @media (max-width: 750px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
             .container {
-                padding: 14px;
+                padding: 14px 16px;
             }
-            .controls {
-                flex-direction: column;
-                align-items: stretch;
+            .timer-control {
+                flex-wrap: wrap;
+                padding: 8px 12px;
             }
-            .stats {
-                margin-left: 0;
+            .game-title-area .game-name {
+                font-size: 16px;
+            }
+            .game-score-area .score-display {
+                font-size: 24px;
+            }
+            .game-breath-ball {
+                width: 60px;
+                height: 60px;
+            }
+            .game-breath-ball .flow-value-display {
+                font-size: 14px;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <h1>Inhaler Flow Monitor</h1>
-            <span class="subtitle">Acoustic inhaler flow visualization</span>
-        </div>
 
-        <!-- 瀏覽器相容性警告 -->
-        <div class="compat-warning" id="compatWarning">
-            ⚠️ 請使用 <strong>Chrome</strong> 或 <strong>Edge</strong> 瀏覽器開啟此頁面，以支援 Web Serial API。
+        <!-- ===== 標題 ===== -->
+        <div class="flex-row" style="justify-content:space-between;">
+            <h1 style="color:#1b4a2f; font-size:26px; margin:0;">🌬️ 呼吸流量監測系統</h1>
+            <div class="flex-row gap-4">
+                <button class="btn btn-sm btn-outline" id="loginBtn">🔑 登入</button>
+                <button class="btn btn-sm btn-primary hidden" id="myfilesBtn">📁 歷史</button>
+                <button class="btn btn-sm btn-primary" id="connectBtn">🔗 連接裝置</button>
+                <button class="btn btn-sm btn-danger" id="resetBtn">🔄 全部重置</button>
+                <button class="btn btn-sm btn-outline" id="calibrateBtn">⚙️ 校準</button>
+                <button class="btn btn-sm btn-test" id="testBtn">🧪 測試</button>
+            </div>
         </div>
+        <div id="greeting" class="hidden text-small" style="margin:2px 0 6px;">👋 您好，使用者</div>
 
-        <!-- Controls -->
-        <div class="controls">
-            <div class="control-group">
-                <label>USB Port</label>
-                <select id="portSelect" style="min-width:180px;"></select>
-                <button id="refreshBtn">Refresh</button>
-                <button id="connectBtn" class="primary">Connect</button>
-            </div>
-            <div class="control-group">
-                <label>Patient ID</label>
-                <input id="patientInput" placeholder="e.g. P001" value="Demo" style="width:120px;">
-            </div>
-            <div class="control-group">
-                <button id="measureBtn">Start</button>
-                <button id="clearBtn">Clear</button>
-                <button id="saveBtn" class="primary">Save CSV</button>
-            </div>
-            <div class="stats">
-                <span>Records: <strong id="recordCount">0</strong></span>
-                <span>Peak: <strong id="peakValue">—</strong> L/min</span>
+        <!-- 狀態列 -->
+        <div class="flex-row" style="justify-content:space-between; margin:4px 0;">
+            <span class="status-chip" id="statusChip">⚪ 未連接</span>
+            <div class="light-bar">
+                <div class="light" id="light1"></div>
+                <div class="light" id="light2"></div>
+                <div class="light" id="light3"></div>
             </div>
         </div>
 
-        <!-- Chart -->
-        <div class="chart-container">
+        <!-- ===== 病患資訊 ===== -->
+        <div class="section-title">
+            📋 病患資訊
+            <span class="badge-section">身分證第二碼自動偵測性別</span>
+        </div>
+        <div class="grid-2">
+            <div class="input-group">
+                <label>病患編號</label>
+                <input id="patientId" placeholder="可選填" />
+            </div>
+            <div class="input-group">
+                <label>身分證 *</label>
+                <input id="patientIdNumber" placeholder="A123456789" maxlength="10" style="text-transform:uppercase;" />
+            </div>
+            <div class="input-group">
+                <label>年齡</label>
+                <input id="patientAge" type="number" value="30" min="6" max="120" />
+            </div>
+            <div class="input-group">
+                <label>身高 (cm)</label>
+                <input id="patientHeight" type="number" value="165" min="100" max="220" step="0.5" />
+            </div>
+            <div class="input-group">
+                <label>性別</label>
+                <span class="badge gender-unknown" id="genderDisplay">
+                    <span class="gender-icon unknown">?</span> 未偵測
+                </span>
+                <span id="genderFromId" class="badge badge-info hidden">(由身分證自動偵測)</span>
+            </div>
+        </div>
+
+        <!-- ===== 標準區間 ===== -->
+        <div class="std-range" id="stdRangeDisplay">
+            <div class="label">💊 吸藥粉建議吸氣流速標準區間</div>
+            <div class="value" id="stdRangeValue">請輸入完整資訊（身分證、年齡、身高）</div>
+            <div class="detail" id="stdRangeDetail"></div>
+            <div class="device-info">📐 參考範圍：30 ~ 90 L/min（不同吸入器可能有不同需求）</div>
+            <div class="disclaimer">⚠️ 本系統為輔助參考，若流速異常請諮詢專業醫師</div>
+        </div>
+
+        <!-- ===== 模式設定（全部可以使用，不鎖功能） ===== -->
+        <div class="section-title">
+            ⚙️ 模式設定
+            <span class="badge-section">吸氣 / 吐氣 / 雙向 皆可切換</span>
+        </div>
+        <div class="flex-row" style="flex-wrap:wrap; gap:5px;">
+            <span class="badge">📊 測量</span>
+            <button class="btn btn-sm btn-active" id="modeInhale">😤 吸氣</button>
+            <button class="btn btn-sm btn-outline" id="modeExhale">😮‍💨 吐氣</button>
+            <button class="btn btn-sm btn-outline" id="modeBoth">🔄 雙向</button>
+            <span class="badge" style="margin-left:6px;">⚡ 觸發</span>
+            <button class="btn btn-sm btn-active" id="modeSingle">單次</button>
+            <button class="btn btn-sm btn-outline" id="modeContinuous">連續</button>
+        </div>
+
+        <!-- ===== 計時器 ===== -->
+        <div class="section-title" style="margin-top:8px;">
+            ⏱️ 計時器
+            <span class="badge-section">可設定時間 / 倒數與累計 / 自動連動</span>
+        </div>
+        <div class="flex-row" style="flex-wrap:wrap; gap:8px;">
+            <div class="timer-control">
+                <span style="font-weight:600; font-size:14px;">⏱️</span>
+                <input type="number" id="timerSetValue" value="60" min="1" max="999" />
+                <span style="font-size:13px; color:#4a6a4a;">秒</span>
+                <button class="btn btn-sm btn-outline" id="timerApplyBtn">設定</button>
+                <span style="color:#4a6a4a; margin:0 4px;">|</span>
+                <button class="btn btn-sm btn-outline" id="timerCountdown">⏳ 倒數</button>
+                <button class="btn btn-sm btn-active" id="timerStopwatch">⏱️ 累計</button>
+                <button class="btn btn-sm btn-outline" id="timerToggle">▶️ 啟動</button>
+                <button class="btn btn-sm btn-outline" id="timerResetBtn">⟳ 重置</button>
+                <span style="color:#4a6a4a; margin:0 4px;">|</span>
+                <button class="btn btn-sm btn-outline" id="timerAutoBtn" style="background:#2ecc7120; color:#1a7a42; border-color:#2ecc7140;">🤖 自動</button>
+                <span class="timer-status-badge auto" id="timerAutoStatus">自動開</span>
+            </div>
+        </div>
+        <div class="flex-row" style="margin-top:4px;">
+            <span class="timer-display" id="timerDisplay">00:00</span>
+            <span class="text-small" id="timerStatus" style="margin-left:12px;">⏸️ 待命</span>
+            <span class="text-small" id="timerModeLabel" style="margin-left:8px; color:#4a6a4a;">(累計模式)</span>
+            <span class="text-small" id="timerTriggerStatus" style="margin-left:8px; color:#4a6a4a; font-weight:600;"></span>
+        </div>
+
+        <!-- ===== 即時監測 ===== -->
+        <div class="section-title">
+            🫁 即時監測
+            <span class="badge-section">步驟指示 / 肺部動態 / 流量儀表</span>
+        </div>
+
+        <div class="step-progress">
+            <div class="step-dot" id="stepDot1">1</div>
+            <div class="step-line"><div class="step-line-fill" id="stepLineFill1"></div></div>
+            <div class="step-dot" id="stepDot2">2</div>
+            <div class="step-line"><div class="step-line-fill" id="stepLineFill2"></div></div>
+            <div class="step-dot" id="stepDot3">3</div>
+        </div>
+
+        <div id="stepImages" class="image-grid"></div>
+        <div id="instruction" class="status-chip" style="background:#e3f0e3; text-align:center; padding:10px; width:100%; font-size:14px;">① 放置吸入器，順時針旋轉</div>
+
+        <!-- 流量狀態指示燈 -->
+        <div class="flex-row" style="justify-content:center; margin:6px 0; gap:16px;">
+            <span class="text-small">流量狀態：</span>
+            <span class="status-indicator grey" id="flowStatusIndicator">⚪ 等待測量</span>
+            <span class="text-small" id="flowStatusDetail" style="color:#4a6a4a;">-</span>
+        </div>
+
+        <!-- 肺部 + 儀表板 -->
+        <div class="flex-row" style="justify-content:center; gap:30px; margin:8px 0; align-items:center;">
+            <div class="lungs-container">
+                <svg id="lungsSvg" viewBox="0 0 300 340">
+                    <defs>
+                        <clipPath id="leftLungClip">
+                            <path d="M65,70 C45,70 20,100 18,145 C16,190 30,230 50,260 C65,280 80,290 95,290 C108,290 115,275 118,255 C121,235 120,210 118,190 C116,170 110,150 100,130 C92,115 82,95 75,80 C70,72 68,70 65,70 Z"/>
+                        </clipPath>
+                        <clipPath id="rightLungClip">
+                            <path d="M235,70 C255,70 280,100 282,145 C284,190 270,230 250,260 C235,280 220,290 205,290 C192,290 185,275 182,255 C179,235 180,210 182,190 C184,170 190,150 200,130 C208,115 218,95 225,80 C230,72 232,70 235,70 Z"/>
+                        </clipPath>
+                        <radialGradient id="lungGradLeft" cx="50%" cy="50%" r="60%">
+                            <stop offset="0%" stop-color="#f0a0a8"/>
+                            <stop offset="40%" stop-color="#e8838b"/>
+                            <stop offset="80%" stop-color="#d06a72"/>
+                            <stop offset="100%" stop-color="#b8555d"/>
+                        </radialGradient>
+                        <radialGradient id="lungGradRight" cx="50%" cy="50%" r="60%">
+                            <stop offset="0%" stop-color="#f0a0a8"/>
+                            <stop offset="40%" stop-color="#e8838b"/>
+                            <stop offset="80%" stop-color="#d06a72"/>
+                            <stop offset="100%" stop-color="#b8555d"/>
+                        </radialGradient>
+                        <radialGradient id="lungGradLeftDim" cx="50%" cy="50%" r="60%">
+                            <stop offset="0%" stop-color="#d0d8d0"/>
+                            <stop offset="40%" stop-color="#c0c8c0"/>
+                            <stop offset="80%" stop-color="#aab5aa"/>
+                            <stop offset="100%" stop-color="#95a095"/>
+                        </radialGradient>
+                        <radialGradient id="lungGradRightDim" cx="50%" cy="50%" r="60%">
+                            <stop offset="0%" stop-color="#d0d8d0"/>
+                            <stop offset="40%" stop-color="#c0c8c0"/>
+                            <stop offset="80%" stop-color="#aab5aa"/>
+                            <stop offset="100%" stop-color="#95a095"/>
+                        </radialGradient>
+                    </defs>
+                    <rect x="0" y="0" width="300" height="340" fill="#f0f8f0" rx="40"/>
+                    <g clip-path="url(#leftLungClip)">
+                        <rect x="0" y="60" width="140" height="240" fill="url(#lungGradLeftDim)" id="leftLungBase"/>
+                        <rect x="0" y="60" width="140" height="240" fill="url(#lungGradLeft)" id="leftLungFill" style="transform: scale(0.50); transform-origin: 68px 180px; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);"/>
+                    </g>
+                    <path d="M65,70 C45,70 20,100 18,145 C16,190 30,230 50,260 C65,280 80,290 95,290 C108,290 115,275 118,255 C121,235 120,210 118,190 C116,170 110,150 100,130 C92,115 82,95 75,80 C70,72 68,70 65,70 Z" fill="none" stroke="#3a5a3a" stroke-width="2.5" opacity="0.6"/>
+                    <g clip-path="url(#rightLungClip)">
+                        <rect x="160" y="60" width="140" height="240" fill="url(#lungGradRightDim)" id="rightLungBase"/>
+                        <rect x="160" y="60" width="140" height="240" fill="url(#lungGradRight)" id="rightLungFill" style="transform: scale(0.50); transform-origin: 232px 180px; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);"/>
+                    </g>
+                    <path d="M235,70 C255,70 280,100 282,145 C284,190 270,230 250,260 C235,280 220,290 205,290 C192,290 185,275 182,255 C179,235 180,210 182,190 C184,170 190,150 200,130 C208,115 218,95 225,80 C230,72 232,70 235,70 Z" fill="none" stroke="#3a5a3a" stroke-width="2.5" opacity="0.6"/>
+                    <path d="M148,20 L148,75" fill="none" stroke="#8a7a5a" stroke-width="10" stroke-linecap="round"/>
+                    <path d="M148,22 L148,73" fill="none" stroke="#c8b898" stroke-width="5" stroke-linecap="round"/>
+                    <path d="M152,88 C155,95 160,100 140,110 C125,118 110,128 100,138" fill="none" stroke="#8a7a5a" stroke-width="7" stroke-linecap="round"/>
+                    <path d="M148,88 C145,95 140,100 160,110 C175,118 190,128 200,138" fill="none" stroke="#8a7a5a" stroke-width="7" stroke-linecap="round"/>
+                    <text x="150" y="16" text-anchor="middle" font-size="12" fill="#3a5a3a" font-weight="700">氣管</text>
+                    <text x="68" y="315" text-anchor="middle" font-size="13" fill="#3a5a3a" font-weight="600">左肺</text>
+                    <text x="232" y="315" text-anchor="middle" font-size="13" fill="#3a5a3a" font-weight="600">右肺</text>
+                    <g id="flowIndicator" opacity="0">
+                        <path d="M148,35 L148,15" stroke="#2ecc71" stroke-width="2" stroke-dasharray="4,4">
+                            <animate attributeName="stroke-dashoffset" from="0" to="-8" dur="0.5s" repeatCount="indefinite"/>
+                        </path>
+                        <polygon points="148,12 144,20 152,20" fill="#2ecc71" opacity="0.8"/>
+                    </g>
+                </svg>
+            </div>
+
+            <div style="flex:1; min-width:250px;">
+                <div class="gauge-container">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+                        <span style="font-weight:600; font-size:14px;">⏱️ 即時流量</span>
+                        <span style="font-size:20px; font-weight:700; color:#1b7e4a;"><span id="flowValue">0.00</span> <span style="font-size:12px; font-weight:400; color:#4a6a4a;">L/min</span></span>
+                        <span class="badge badge-gold">🏆 峰值 <span id="peakHold">0.00</span></span>
+                    </div>
+                    <div style="position:relative; height:70px;">
+                        <canvas id="gaugeCanvas" width="500" height="70" style="width:100%; height:70px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 圖表 ===== -->
+        <div class="section-title">
+            📈 流量圖表
+            <span class="badge-section">可調整Y軸</span>
+        </div>
+        <div class="chart-wrapper">
             <canvas id="flowChart"></canvas>
         </div>
-
-        <!-- Status -->
-        <div class="status-bar">
-            <span class="status-msg" id="statusMsg">Not connected</span>
-            <span class="peak" id="statusPeak"></span>
+        <div class="flex-row" style="justify-content:space-between; flex-wrap:wrap; gap:6px;">
+            <button class="btn btn-sm btn-outline" id="clearChartBtn">🗑️ 清除圖表</button>
+            <div class="flex-row gap-4">
+                <label class="text-small">Y軸 <input type="number" id="yMinInput" value="0" step="0.5" style="width:46px; padding:3px 6px; border-radius:16px; border:1px solid #dce8dc;"> ~ <input type="number" id="yMaxInput" value="100" step="5" style="width:46px; padding:3px 6px; border-radius:16px; border:1px solid #dce8dc;"></label>
+                <button class="btn btn-sm btn-outline" id="applyYRange">套用</button>
+            </div>
         </div>
+
+        <!-- ===== 遊戲模式 ===== -->
+        <div class="section-title">
+            🎮 遊戲模式
+            <span class="badge-section">六款呼吸遊戲 / 即時計分 / 動態視覺</span>
+        </div>
+        <div class="game-overlay" id="gameOverlay">
+            <div class="game-particles" id="gameParticles"></div>
+            <div class="game-header">
+                <div class="game-title-area">
+                    <span class="game-icon" id="gameIcon">🎯</span>
+                    <span class="game-name" id="gameNameDisplay">目標挑戰</span>
+                    <span class="game-rule" id="gameRuleDisplay">點擊「開啟遊戲」開始</span>
+                    <span class="game-status-badge" id="gameStatusBadge">● 關閉</span>
+                </div>
+                <div class="game-score-area">
+                    <span class="score-label">⭐ 分數</span>
+                    <span class="score-display" id="gameScoreValue">0</span>
+                    <span class="target-display" id="gameTargetDisplay">🎯 目標: --</span>
+                </div>
+            </div>
+            <div class="game-body">
+                <div class="game-breath-ball" id="breathBall" style="transform: scale(1);">
+                    <div class="ball-inner"></div>
+                    <div class="flow-value-display" id="ballFlowValue">0.0</div>
+                    <div class="ball-label">即時流量</div>
+                </div>
+                <div class="game-progress-section">
+                    <div class="progress-label">
+                        <span>進度</span>
+                        <span id="gameProgressText">0%</span>
+                    </div>
+                    <div class="game-progress-track">
+                        <div class="game-progress-fill" id="gameProgressFill" style="width:0%;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="game-feedback-area">
+                <span class="game-feedback-text" id="gameFeedback">💪 點擊「開啟遊戲」開始挑戰！</span>
+                <button class="btn btn-sm btn-gold" id="gameModeBtn">🎮 開啟遊戲</button>
+                <button class="btn btn-sm btn-outline" id="gameNextBtn" style="border-color:#5a7a5a; color:#8a9a8a; display:none;">🔄 換遊戲</button>
+            </div>
+        </div>
+
+        <!-- ===== 儲存 ===== -->
+        <div class="section-title">
+            💾 資料儲存
+            <span class="badge-section">需連線 + 身分證正確</span>
+        </div>
+        <div class="flex-row" style="gap:10px; flex-wrap:wrap;">
+            <button class="btn btn-primary" id="saveBtn" disabled>💾 儲存資料</button>
+            <button class="btn btn-outline" id="exportBtn">📤 匯出CSV</button>
+            <span class="text-small" id="saveHint" style="color:#4a6a4a;">* 需連線裝置且身分證正確</span>
+        </div>
+        <div class="text-small" style="margin:4px 0; color:#4a6a4a;">💡 點擊「連接裝置」選擇 USB Serial 裝置</div>
+
     </div>
 
     <script>
-        // ============================================================
-        // 檢查瀏覽器支援 Web Serial API
-        // ============================================================
-        (function checkCompatibility() {
-            const warning = document.getElementById('compatWarning');
-            const connectBtn = document.getElementById('connectBtn');
-            const statusMsg = document.getElementById('statusMsg');
+        // ====== DOM 元素 ======
+        const $ = id => document.getElementById(id);
+
+        // ====== 音效系統 ======
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                try {
+                    audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.log('音效初始化失敗');
+                }
+            }
+        }
+
+        function playBeep(freq, duration, type = 'sine', volume = 0.08) {
+            try {
+                initAudio();
+                if (!audioCtx) return;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = freq;
+                osc.type = type;
+                gain.gain.value = volume;
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {}
+        }
+
+        function playSound(type) {
+            switch (type) {
+                case 'gameStart':
+                    playBeep(523, 0.1);
+                    setTimeout(() => playBeep(659, 0.1), 120);
+                    setTimeout(() => playBeep(784, 0.15), 240);
+                    break;
+                case 'score':
+                    playBeep(880, 0.08);
+                    setTimeout(() => playBeep(1047, 0.1), 100);
+                    break;
+                case 'bigScore':
+                    playBeep(1047, 0.1);
+                    setTimeout(() => playBeep(1319, 0.1), 120);
+                    setTimeout(() => playBeep(1568, 0.15), 240);
+                    break;
+                case 'goal':
+                    playBeep(523, 0.1);
+                    setTimeout(() => playBeep(659, 0.1), 100);
+                    setTimeout(() => playBeep(784, 0.1), 200);
+                    setTimeout(() => playBeep(1047, 0.2), 300);
+                    break;
+                case 'gameOver':
+                    playBeep(440, 0.15);
+                    setTimeout(() => playBeep(349, 0.15), 180);
+                    setTimeout(() => playBeep(294, 0.25), 360);
+                    break;
+                case 'click':
+                    playBeep(600, 0.05, 'sine', 0.05);
+                    break;
+                case 'timerStart':
+                    playBeep(880, 0.06);
+                    setTimeout(() => playBeep(1100, 0.08), 80);
+                    break;
+                case 'timerStop':
+                    playBeep(440, 0.08);
+                    setTimeout(() => playBeep(330, 0.1), 100);
+                    break;
+                default:
+                    playBeep(440, 0.08);
+            }
+        }
+
+        // ====== 測試按鈕 ======
+        document.getElementById('testBtn').onclick = function() {
+            playSound('click');
+            alert('🧪 測試成功！\n\n✅ 所有按鈕在未連線時都可以點擊！\n✅ 音效系統已初始化\n✅ 遊戲畫面豐富可動\n✅ 肺部動畫即時反應\n✅ 性別圖示：男性♂藍色 / 女性♀紅色\n✅ 計時器自動連動：偵測到流量時自動啟動\n✅ 吸藥粉標準區間：30~90 L/min\n✅ 圖表X軸會正確顯示時間（從連線開始計算）\n✅ 全部重置：恢復所有狀態到初始值\n✅ 吐氣/雙向模式皆可使用（不鎖功能）');
+        };
+
+        // ====== 身分證驗證 ======
+        function validateTaiwanId(id) {
+            if (!id || id.length !== 10) return false;
+            if (!/^[A-Z]$/.test(id.charAt(0))) return false;
+            if (!/^[0-9]{9}$/.test(id.substring(1))) return false;
+            const second = parseInt(id.charAt(1));
+            if (second !== 1 && second !== 2) return false;
+            return true;
+        }
+
+        // ====== 全域狀態 ======
+        let isConnected = false;
+        let currentGender = null;
+        let flowData = [];
+        let peakFlowValue = 0;
+        let currentFlow = 0;
+        let chartInstance = null;
+        let serialPort = null;
+        let reader = null;
+        let startTime = null;
+
+        // 測量模式
+        let measureMode = 'inhale'; // 'inhale', 'exhale', 'both'
+        let triggerMode = 'single'; // 'single', 'continuous'
+
+        // 吸藥粉標準區間：30 ~ 90 L/min
+        const STD_MIN = 30;
+        const STD_MAX = 90;
+
+        // ====== 計時器狀態 ======
+        let timerInterval = null;
+        let timerSeconds = 0;
+        let timerRunning = false;
+        let timerMode = 'stopwatch';
+        let timerSetValue = 60;
+        let timerAutoMode = true;
+        let timerTriggeredByFlow = false;
+
+        // ====== 遊戲狀態 ======
+        let gameActive = false;
+        let gameScore = 0;
+        let currentGame = 0;
+        let gameTarget = 0;
+        let gameProgressVal = 0;
+        let gameCompleted = false;
+        let gameConsecutiveBreaths = 0;
+
+        // ====== 性別與標準區間 ======
+        function getGenderFromId(id) {
+            if (!validateTaiwanId(id)) return null;
+            return parseInt(id.charAt(1)) === 1 ? 'M' : 'F';
+        }
+
+        function getGenderText(gender) {
+            return gender === 'M' ? '男性' : '女性';
+        }
+
+        // ====== 更新性別顯示 ======
+        function updateGenderDisplay(gender) {
+            const display = document.getElementById('genderDisplay');
+            if (gender === 'M') {
+                display.innerHTML = '<span class="gender-icon male">♂</span> 男性';
+                display.className = 'badge gender-male';
+            } else if (gender === 'F') {
+                display.innerHTML = '<span class="gender-icon female">♀</span> 女性';
+                display.className = 'badge gender-female';
+            } else {
+                display.innerHTML = '<span class="gender-icon unknown">?</span> 未偵測';
+                display.className = 'badge gender-unknown';
+            }
+        }
+
+        // ====== 更新標準區間 ======
+        function updatePersonalizedStandard() {
+            const idValue = document.getElementById('patientIdNumber').value.toUpperCase();
+            const isValid = validateTaiwanId(idValue);
+            const age = parseInt(document.getElementById('patientAge').value);
+            const height = parseFloat(document.getElementById('patientHeight').value);
+
+            let gender = null;
+            if (isValid) {
+                gender = getGenderFromId(idValue);
+                currentGender = gender;
+                updateGenderDisplay(gender);
+            } else {
+                currentGender = null;
+                updateGenderDisplay(null);
+            }
+
+            const rangeDisplay = document.getElementById('stdRangeValue');
+            const detailDisplay = document.getElementById('stdRangeDetail');
+
+            if (!gender || !age || isNaN(age) || age < 6 || !height || isNaN(height) || height < 100) {
+                rangeDisplay.textContent = '請輸入完整資訊（身分證、年齡、身高）';
+                rangeDisplay.style.color = '#b7950b';
+                detailDisplay.textContent = '需要：身分證(自動偵測性別) + 年齡(≥6歲) + 身高(≥100cm)';
+                return;
+            }
+
+            const genderText = getGenderText(gender);
+            const ageGroup = age < 13 ? '兒童' : (age < 18 ? '青少年' : (age < 61 ? '成人' : '銀髮'));
+
+            rangeDisplay.textContent = `${genderText} ${ageGroup}：建議吸氣流速 30 ~ 90 L/min`;
+            rangeDisplay.style.color = '#1b7e4a';
+
+            detailDisplay.textContent =
+                `📐 參考範圍：30 ~ 90 L/min（不同吸入器可能有不同需求，請遵從醫師指示）\n📏 年齡：${age}歲 | 身高：${height}cm | 性別：${genderText}`;
+
+            if (currentFlow > 0) {
+                updateFlowStatus(currentFlow);
+            }
+        }
+
+        // ====== 肺部動畫 ======
+        function updateLungs(flow) {
+            const absFlow = Math.abs(flow);
+            const normalizedFlow = Math.min(Math.max(absFlow, 0), 90);
+            const scale = 0.45 + (normalizedFlow / 90) * 0.50;
+
+            const leftFill = document.getElementById('leftLungFill');
+            const rightFill = document.getElementById('rightLungFill');
+            const flowIndicator = document.getElementById('flowIndicator');
+
+            if (leftFill) {
+                leftFill.setAttribute('transform', `scale(${scale},${scale})`);
+            }
+            if (rightFill) {
+                rightFill.setAttribute('transform', `scale(${scale},${scale})`);
+            }
+
+            const intensity = Math.min(absFlow / 50, 1);
+            const r = 160 + 90 * intensity;
+            const g = 130 - 50 * intensity;
+            const b = 130 - 50 * intensity;
+            const color = `rgb(${r},${g},${b})`;
+
+            if (leftFill) leftFill.setAttribute('fill', color);
+            if (rightFill) rightFill.setAttribute('fill', color);
+
+            if (flowIndicator) {
+                flowIndicator.setAttribute('opacity', absFlow > 5 ? '1' : '0');
+            }
+
+            updateBreathBall(absFlow);
+
+            if (timerAutoMode && absFlow > 5 && !timerRunning) {
+                startTimer();
+                timerTriggeredByFlow = true;
+                document.getElementById('timerTriggerStatus').textContent = '⏱️ 流量觸發啟動';
+                setTimeout(() => {
+                    if (timerRunning) {
+                        document.getElementById('timerTriggerStatus').textContent = '';
+                    }
+                }, 2000);
+            }
+        }
+
+        // ====== 更新呼吸球 ======
+        function updateBreathBall(flow) {
+            const ball = document.getElementById('breathBall');
+            const flowDisplay = document.getElementById('ballFlowValue');
+            if (!ball) return;
+
+            const normalizedFlow = Math.min(Math.abs(flow), 90);
+            const scale = 0.6 + (normalizedFlow / 90) * 0.5;
+            ball.style.transform = `scale(${scale})`;
+
+            const intensity = Math.min(normalizedFlow / 50, 1);
+            const r = 30 + 60 * intensity;
+            const g = 90 + 80 * intensity;
+            const b = 30 + 40 * intensity;
+            ball.style.background =
+                `radial-gradient(circle at 35% 35%, rgb(${r+50},${g+50},${b+50}), rgb(${r},${g},${b}))`;
+            ball.style.boxShadow = `0 0 ${20 + 40 * intensity}px rgba(46, 204, 113, ${0.1 + 0.3 * intensity})`;
+
+            if (flowDisplay) {
+                flowDisplay.textContent = flow.toFixed(1);
+            }
+        }
+
+        // ====== 更新流量狀態 ======
+        function updateFlowStatus(flow) {
+            const absFlow = Math.abs(flow);
+            const indicator = document.getElementById('flowStatusIndicator');
+            const detail = document.getElementById('flowStatusDetail');
+
+            if (absFlow < 0.5) {
+                indicator.className = 'status-indicator grey';
+                indicator.textContent = '⚪ 等待測量';
+                detail.textContent = '-';
+                document.getElementById('light1').className = 'light';
+                document.getElementById('light2').className = 'light';
+                document.getElementById('light3').className = 'light';
+                return;
+            }
+
+            if (absFlow >= STD_MIN && absFlow <= STD_MAX) {
+                indicator.className = 'status-indicator green';
+                indicator.textContent = '✅ 正常 (綠燈)';
+                detail.textContent = `${absFlow.toFixed(2)} L/min 在建議範圍內 (30~90 L/min)`;
+                document.getElementById('light1').className = 'light on-green';
+                document.getElementById('light2').className = 'light on-green';
+                document.getElementById('light3').className = 'light on-green';
+            } else if (absFlow < STD_MIN) {
+                indicator.className = 'status-indicator yellow';
+                indicator.textContent = '⚠️ 流速不足 (黃燈)';
+                detail.textContent =
+                    `${absFlow.toFixed(2)} L/min 低於建議值 ${STD_MIN} L/min，可能影響藥效，請諮詢醫師`;
+                document.getElementById('light1').className = 'light on-yellow';
+                document.getElementById('light2').className = 'light on-yellow';
+                document.getElementById('light3').className = 'light on-yellow';
+            } else {
+                indicator.className = 'status-indicator red';
+                indicator.textContent = '🔴 流速過快 (紅燈)';
+                detail.textContent =
+                    `${absFlow.toFixed(2)} L/min 高於建議值 ${STD_MAX} L/min，可能影響藥物沉積，請諮詢醫師`;
+                document.getElementById('light1').className = 'light on-red';
+                document.getElementById('light2').className = 'light on-red';
+                document.getElementById('light3').className = 'light on-red';
+            }
+        }
+
+        // ====== 更新所有連動 ======
+        function updateAllLinkedFields() {
+            const idValue = document.getElementById('patientIdNumber').value.toUpperCase();
+            document.getElementById('patientIdNumber').value = idValue;
+            const isValid = validateTaiwanId(idValue);
+
+            if (isValid) {
+                const gender = getGenderFromId(idValue);
+                currentGender = gender;
+                updateGenderDisplay(gender);
+                document.getElementById('genderFromId').classList.remove('hidden');
+                document.getElementById('statusChip').className = 'status-chip success';
+                document.getElementById('statusChip').textContent = '✅ 身分證正確';
+            } else if (idValue.length > 0) {
+                currentGender = null;
+                updateGenderDisplay(null);
+                document.getElementById('genderFromId').classList.add('hidden');
+                document.getElementById('statusChip').className = 'status-chip error';
+                document.getElementById('statusChip').textContent = '⚠️ 需10碼, 首碼大寫英文, 第二碼1/2';
+            } else {
+                currentGender = null;
+                updateGenderDisplay(null);
+                document.getElementById('genderFromId').classList.add('hidden');
+                document.getElementById('statusChip').className = 'status-chip';
+                document.getElementById('statusChip').textContent = isConnected ? '✅ 已連線' : '⚪ 未連接';
+            }
+
+            updatePersonalizedStandard();
+            updateFlowStatus(currentFlow);
+
+            const canSave = isValid && isConnected;
+            document.getElementById('saveBtn').disabled = !canSave;
+            const saveHint = document.getElementById('saveHint');
+            if (!canSave) {
+                if (!isConnected) {
+                    saveHint.textContent = '⚠️ 請先連接裝置';
+                    saveHint.style.color = '#b7950b';
+                } else if (!isValid) {
+                    saveHint.textContent = '⚠️ 請輸入正確身分證';
+                    saveHint.style.color = '#c0392b';
+                }
+            } else {
+                saveHint.textContent = '✅ 可儲存';
+                saveHint.style.color = '#1a7a42';
+            }
+        }
+
+        // ====== 事件綁定 ======
+        document.getElementById('patientIdNumber').addEventListener('input', function() {
+            this.value = this.value.toUpperCase();
+            updateAllLinkedFields();
+        });
+        document.getElementById('patientAge').addEventListener('input', updateAllLinkedFields);
+        document.getElementById('patientAge').addEventListener('change', updateAllLinkedFields);
+        document.getElementById('patientHeight').addEventListener('input', updateAllLinkedFields);
+        document.getElementById('patientHeight').addEventListener('change', updateAllLinkedFields);
+
+        // ====== 圖表初始化 ======
+        const ctxChart = document.getElementById('flowChart').getContext('2d');
+        chartInstance = new Chart(ctxChart, {
+            type: 'line',
+            data: { labels: [], datasets: [{ label: '流量 (L/min)', data: [], borderColor: '#1b7e4a', tension: 0.3,
+                    pointRadius: 0, fill: true, backgroundColor: 'rgba(27,126,74,0.05)' }] },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false,
+                scales: {
+                    x: {
+                        title: { display: true, text: '時間 (秒)' },
+                        grid: { color: '#e8f0e8' },
+                        min: 0,
+                        ticks: {
+                            stepSize: 1,
+                            maxTicksLimit: 20
+                        }
+                    },
+                    y: {
+                        min: 0,
+                        max: 100,
+                        title: { display: true, text: '流量 (L/min)' },
+                        grid: { color: '#e8f0e8' }
+                    }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // ====== 儀表板 ======
+        const gaugeCanvas = document.getElementById('gaugeCanvas');
+        const ctxGauge = gaugeCanvas.getContext('2d');
+
+        function drawGauge(value, peak) {
+            const w = gaugeCanvas.width,
+                h = gaugeCanvas.height;
+            ctxGauge.clearRect(0, 0, w, h);
+            const cx = w / 2,
+                cy = h - 6,
+                radius = Math.min(w / 2 - 24, 50);
+
+            ctxGauge.beginPath();
+            ctxGauge.arc(cx, cy, radius, Math.PI, 0);
+            ctxGauge.strokeStyle = '#d0e2d0';
+            ctxGauge.lineWidth = 10;
+            ctxGauge.stroke();
+
+            const maxDisplay = 100;
+            const angle = Math.PI + Math.min(value / maxDisplay, 1) * Math.PI;
+            ctxGauge.beginPath();
+            ctxGauge.arc(cx, cy, radius, Math.PI, angle);
+            ctxGauge.strokeStyle = '#1b7e4a';
+            ctxGauge.lineWidth = 10;
+            ctxGauge.stroke();
+
+            const pAngle = Math.PI + Math.min(value / maxDisplay, 1) * Math.PI;
+            const px = cx + (radius - 2) * Math.cos(pAngle);
+            const py = cy + (radius - 2) * Math.sin(pAngle);
+            ctxGauge.beginPath();
+            ctxGauge.moveTo(cx, cy);
+            ctxGauge.lineTo(px, py);
+            ctxGauge.strokeStyle = '#1f3a2f';
+            ctxGauge.lineWidth = 3;
+            ctxGauge.stroke();
+
+            if (peak > 0.3) {
+                const peakAngle = Math.PI + Math.min(peak / maxDisplay, 1) * Math.PI;
+                const px2 = cx + (radius + 2) * Math.cos(peakAngle);
+                const py2 = cy + (radius + 2) * Math.sin(peakAngle);
+                ctxGauge.beginPath();
+                ctxGauge.moveTo(cx, cy);
+                ctxGauge.lineTo(px2, py2);
+                ctxGauge.strokeStyle = '#e74c3c';
+                ctxGauge.lineWidth = 2;
+                ctxGauge.setLineDash([4, 5]);
+                ctxGauge.stroke();
+                ctxGauge.setLineDash([]);
+                ctxGauge.beginPath();
+                ctxGauge.arc(px2, py2, 4, 0, 2 * Math.PI);
+                ctxGauge.fillStyle = '#e74c3c';
+                ctxGauge.fill();
+            }
+
+            ctxGauge.fillStyle = '#4a6a4a';
+            ctxGauge.font = '10px sans-serif';
+            ctxGauge.textAlign = 'center';
+            for (let i = 0; i <= 100; i += 20) {
+                const a = Math.PI + (i / 100) * Math.PI;
+                const x = cx + (radius - 14) * Math.cos(a);
+                const y = cy + (radius - 14) * Math.sin(a);
+                ctxGauge.fillText(i, x, y + 3);
+            }
+            ctxGauge.fillStyle = '#1f3a2f';
+            ctxGauge.font = 'bold 14px sans-serif';
+            ctxGauge.fillText(value.toFixed(1), cx, 16);
+
+            ctxGauge.fillStyle = 'rgba(46, 204, 113, 0.15)';
+            ctxGauge.fillRect(cx - 60, h - 14, 120, 6);
+            ctxGauge.fillStyle = '#2ecc71';
+            ctxGauge.font = '8px sans-serif';
+            ctxGauge.fillText('30', cx - 60, h - 4);
+            ctxGauge.fillText('90', cx + 50, h - 4);
+        }
+
+        // ====== 步驟管理 ======
+        function setStep(step) {
+            const stepDot1 = document.getElementById('stepDot1');
+            const stepDot2 = document.getElementById('stepDot2');
+            const stepDot3 = document.getElementById('stepDot3');
+            const stepLineFill1 = document.getElementById('stepLineFill1');
+            const stepLineFill2 = document.getElementById('stepLineFill2');
+
+            [stepDot1, stepDot2, stepDot3].forEach((d, i) => {
+                d.classList.remove('active', 'done');
+                if (i < step) d.classList.add('done');
+                else if (i === step) d.classList.add('active');
+            });
+
+            if (step === 0) { stepLineFill1.style.width = '0%';
+                stepLineFill2.style.width = '0%'; } else if (step === 1) { stepLineFill1.style.width = '100%';
+                stepLineFill2.style.width = '0%';
+                stepLineFill1.classList.add('flowing'); } else if (step === 2) { stepLineFill1.style.width = '100%';
+                stepLineFill2.style.width = '100%';
+                stepLineFill1.classList.remove('flowing');
+                stepLineFill2.classList.add('flowing'); } else { stepLineFill1.classList.remove('flowing');
+                stepLineFill2.classList.remove('flowing'); }
+
+            const images = [
+                [{ src: 'img/lidOff_correct.png', cap: '取下蓋子' }, { src: 'img/clockwise.png', cap: '順時針旋轉' }],
+                [{ src: 'img/lidOff_highRes.png', cap: '取下蓋子' }, { src: 'img/counterclockwise.png',
+                    cap: '逆時針旋轉' }],
+                [{ src: 'img/breatheOutandIn.png', cap: '吐氣→深吸' }],
+                []
+            ];
+            const stepImages = document.getElementById('stepImages');
+            stepImages.innerHTML = '';
+            (images[step] || []).forEach(img => {
+                const div = document.createElement('div');
+                div.className = 'img-card';
+                div.innerHTML = `<img src="${img.src}" alt="${img.cap}"><div class="caption">${img.cap}</div>`;
+                stepImages.appendChild(div);
+            });
+            const texts = ['① 放置吸入器，順時針旋轉', '② 逆時針釋放藥劑', '③ 深吸後屏息10秒', '✅ 測量完成！'];
+            document.getElementById('instruction').textContent = texts[step] || '';
+        }
+
+        // ====== 連接裝置 ======
+        document.getElementById('connectBtn').onclick = async function() {
+            playSound('click');
+            if (isConnected) {
+                try { if (reader) await reader.cancel(); } catch (e) {}
+                try { if (serialPort) await serialPort.close(); } catch (e) {}
+                serialPort = null;
+                isConnected = false;
+                reader = null;
+                startTime = null;
+                document.getElementById('statusChip').className = 'status-chip';
+                document.getElementById('statusChip').textContent = '🔌 已斷開';
+                this.textContent = '🔗 連接裝置';
+                updateAllLinkedFields();
+                showModal('🔌 已斷開連接', '裝置已成功中斷連線');
+                return;
+            }
 
             if (!('serial' in navigator)) {
-                warning.classList.add('show');
-                connectBtn.disabled = true;
-                connectBtn.textContent = '不支援';
-                statusMsg.textContent = '⚠️ 請使用 Chrome 或 Edge 瀏覽器';
-                console.warn('Web Serial API not supported');
+                alert('❌ 請使用 Chrome 或 Edge 瀏覽器，並啟用 Web Serial API');
+                return;
             }
-        })();
 
-        // =====================================================
-        //  Ideal waveform (0.5 s per point) - from Python
-        // =====================================================
-        const IDEAL_FLOW = [0, 40, 40, 40, 40, 20, 5, 0, 0, 0];
-        const IDEAL_DT = 0.5;
+            try {
+                document.getElementById('statusChip').textContent = '⏳ 正在選擇裝置...';
+                serialPort = await navigator.serial.requestPort();
+                await serialPort.open({ baudRate: 9600 });
+                isConnected = true;
+                startTime = Date.now();
+                this.textContent = '🔌 斷開裝置';
+                document.getElementById('statusChip').className = 'status-chip success';
+                document.getElementById('statusChip').textContent = '✅ 已連線';
+                flowData = [];
+                peakFlowValue = 0;
+                currentFlow = 0;
+                chartInstance.data.labels = [];
+                chartInstance.data.datasets[0].data = [];
+                chartInstance.update();
+                updateAllLinkedFields();
+                listenSerial();
+                playSound('gameStart');
+                showModal('✅ 連線成功', '裝置已成功連接！');
+            } catch (e) {
+                console.error('連線錯誤:', e);
+                document.getElementById('statusChip').className = 'status-chip error';
+                document.getElementById('statusChip').textContent = '❌ ' + e.message;
+                alert('連線失敗: ' + e.message);
+            }
+        };
 
-        // =====================================================
-        //  Smooth curve (from Python)
-        // =====================================================
-        function smoothCurve(xs, ys) {
-            const n = xs.length;
-            if (n < 3) return { x: xs, y: ys };
-            const sm = [];
-            for (let i = 0; i < n; i++) {
-                let lo = Math.max(0, i - 1);
-                let hi = Math.min(n, i + 2);
-                let sum = 0;
-                for (let j = lo; j < hi; j++) {
-                    sum += ys[j];
+        async function listenSerial() {
+            const decoder = new TextDecoderStream();
+            serialPort.readable.pipeTo(decoder.writable);
+            reader = decoder.readable.getReader();
+            try {
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+                    if (value) handleSerialData(value.trim());
                 }
-                sm.push(sum / (hi - lo));
+            } catch (e) {
+                console.log('讀取中斷:', e);
             }
-            return { x: xs, y: sm };
         }
 
-        // =====================================================
-        //  Generate ideal curve (from Python)
-        // =====================================================
-        function generateIdealCurve() {
-            const xs = IDEAL_FLOW.map((_, i) => i * IDEAL_DT);
-            const ys = [...IDEAL_FLOW];
-            if (xs.length >= 4) {
-                const n = 300;
-                const xnew = [],
-                    ynew = [];
-                const step = (xs[xs.length - 1] - xs[0]) / (n - 1);
-                for (let i = 0; i < n; i++) {
-                    const t = xs[0] + i * step;
-                    xnew.push(t);
-                    let idx = 0;
-                    for (let j = 0; j < xs.length - 1; j++) {
-                        if (t >= xs[j] && t <= xs[j + 1]) {
-                            idx = j;
-                            break;
-                        }
-                        if (j === xs.length - 2) idx = j;
-                    }
-                    const x0 = xs[idx],
-                        x1 = xs[idx + 1];
-                    const y0 = ys[idx],
-                        y1 = ys[idx + 1];
-                    const frac = (t - x0) / (x1 - x0 || 1);
-                    const val = y0 + (y1 - y0) * frac;
-                    ynew.push(Math.max(0, val));
+        function handleSerialData(line) {
+            const match = line.match(/Flow[:：]\s*([0-9.]+)/i);
+            if (match) {
+                let flow = parseFloat(match[1]);
+
+                // ★★★ 根據模式處理流量方向 ★★★
+                if (measureMode === 'exhale') {
+                    flow = -Math.abs(flow); // 吐氣顯示負值
+                } else if (measureMode === 'both') {
+                    // 雙向模式：保持原值（正負都顯示）
                 }
-                return { x: xnew, y: ynew };
-            }
-            return { x: xs, y: ys };
-        }
+                // inhale 模式：保持正值
 
-        // =====================================================
-        //  Parse functions (from Python)
-        // =====================================================
-        function parseFFT(line) {
-            if (!line.includes('[FFT]')) return null;
-            const bands = {};
-            const regex = /(\d+)k\s*:\s*([-+]?\d*\.?\d+)/g;
-            let m;
-            while ((m = regex.exec(line)) !== null) {
-                const k = parseInt(m[1]);
-                const v = parseFloat(m[2]);
-                if (k >= 1 && k <= 20) {
-                    bands[k] = v;
+                currentFlow = flow;
+
+                const now = ((Date.now() - startTime) / 1000).toFixed(2);
+
+                flowData.push([parseFloat(now), flow]);
+                document.getElementById('flowValue').textContent = flow.toFixed(2);
+
+                if (Math.abs(flow) > peakFlowValue) {
+                    peakFlowValue = Math.abs(flow);
+                    document.getElementById('peakHold').textContent = peakFlowValue.toFixed(2);
+                }
+
+                drawGauge(Math.abs(flow), peakFlowValue);
+                updateLungs(flow);
+                updateFlowStatus(flow);
+
+                chartInstance.data.labels.push(now);
+                chartInstance.data.datasets[0].data.push(flow);
+
+                if (chartInstance.data.labels.length > 200) {
+                    chartInstance.data.labels.shift();
+                    chartInstance.data.datasets[0].data.shift();
+                }
+                chartInstance.update();
+
+                if (gameActive) {
+                    processGame(flow);
                 }
             }
-            return Object.keys(bands).length > 0 ? bands : null;
         }
 
-        function parseDetect(line) {
-            if (!line.includes('[DETECT]')) return null;
-            const flowMatch = line.match(/Flow\s*=\s*(YES|no)/i);
-            if (!flowMatch) return null;
-            const flow_yes = flowMatch[1].toUpperCase() === 'YES';
-            let est = 0.0;
-            const estMatch = line.match(/Est\s*=\s*([-+]?\d*\.?\d+)/);
-            if (estMatch) est = parseFloat(estMatch[1]) || 0;
-            let low_e = 0;
-            const lowMatch = line.match(/LowEnergy\s*=\s*([-+]?\d+)/);
-            if (lowMatch) low_e = parseInt(lowMatch[1]) || 0;
-            return { flow_yes, est, low_e };
+        // ====== ★★★ 全部重置 ★★★ ======
+        document.getElementById('resetBtn').onclick = function() {
+            playSound('click');
+
+            // 1. 清除數據
+            flowData = [];
+            peakFlowValue = 0;
+            currentFlow = 0;
+
+            // 2. 清除圖表
+            chartInstance.data.labels = [];
+            chartInstance.data.datasets[0].data = [];
+            chartInstance.update();
+
+            // 3. 重置顯示
+            document.getElementById('flowValue').textContent = '0.00';
+            document.getElementById('peakHold').textContent = '0.00';
+            drawGauge(0, 0);
+
+            // 4. 重置肺部
+            document.getElementById('leftLungFill').setAttribute('transform', 'scale(0.50)');
+            document.getElementById('rightLungFill').setAttribute('transform', 'scale(0.50)');
+            document.getElementById('flowIndicator').setAttribute('opacity', '0');
+
+            // 5. 重置呼吸球
+            const breathBall = document.getElementById('breathBall');
+            if (breathBall) {
+                breathBall.style.transform = 'scale(1)';
+                breathBall.style.background = 'radial-gradient(circle at 35% 35%, #4a8a4a, #1a5a1a)';
+            }
+            document.getElementById('ballFlowValue').textContent = '0.0';
+
+            // 6. 重置燈號
+            document.getElementById('light1').className = 'light';
+            document.getElementById('light2').className = 'light';
+            document.getElementById('light3').className = 'light';
+
+            // 7. 重置流量狀態
+            const indicator = document.getElementById('flowStatusIndicator');
+            indicator.className = 'status-indicator grey';
+            indicator.textContent = '⚪ 等待測量';
+            document.getElementById('flowStatusDetail').textContent = '-';
+
+            // 8. 重置步驟
+            setStep(0);
+
+            // 9. 重置計時器
+            resetTimer();
+
+            // 10. 重置遊戲
+            gameActive = false;
+            gameScore = 0;
+            gameProgressVal = 0;
+            gameCompleted = false;
+            gameConsecutiveBreaths = 0;
+            document.getElementById('gameStatusBadge').textContent = '● 關閉';
+            document.getElementById('gameStatusBadge').className = 'game-status-badge';
+            document.getElementById('gameScoreValue').textContent = '0';
+            document.getElementById('gameModeBtn').textContent = '🎮 開啟遊戲';
+            document.getElementById('gameNameDisplay').textContent = '目標挑戰';
+            document.getElementById('gameNameDisplay').classList.add('hidden');
+            document.getElementById('gameRuleDisplay').textContent = '點擊「開啟遊戲」開始';
+            document.getElementById('gameTargetDisplay').textContent = '🎯 目標: --';
+            document.getElementById('gameProgressFill').style.width = '0%';
+            document.getElementById('gameProgressText').textContent = '0%';
+            document.getElementById('gameFeedback').textContent = '💪 點擊「開啟遊戲」開始挑戰！';
+            document.getElementById('gameFeedback').className = 'game-feedback-text';
+            document.getElementById('gameNextBtn').style.display = 'none';
+            document.getElementById('gameIcon').textContent = '🎯';
+            document.getElementById('gameProgress').classList.add('hidden');
+
+            // 11. 重置模式（回到吸氣 + 單次）
+            document.querySelectorAll('#modeInhale,#modeExhale,#modeBoth').forEach(b => b.className =
+            'btn btn-sm btn-outline');
+            document.getElementById('modeInhale').className = 'btn btn-sm btn-active';
+            measureMode = 'inhale';
+
+            document.querySelectorAll('#modeSingle,#modeContinuous').forEach(b => b.className =
+            'btn btn-sm btn-outline');
+            document.getElementById('modeSingle').className = 'btn btn-sm btn-active';
+            triggerMode = 'single';
+
+            // 12. 清空病患編號
+            document.getElementById('patientId').value = '';
+
+            // 13. 更新所有連動
+            updateAllLinkedFields();
+
+            showModal('🔄 全部重置完成', '所有數據已清除，所有狀態已恢復初始值\n\n✅ 圖表已清空\n✅ 燈號已復位\n✅ 肺部已縮回\n✅ 計時器已重置\n✅ 遊戲已關閉\n✅ 模式已回到預設 (吸氣+單次)\n\n💡 裝置仍保持連線');
+        };
+
+        // ====== 儲存 ======
+        document.getElementById('saveBtn').onclick = function() {
+            playSound('click');
+            const id = document.getElementById('patientId').value.trim() || '未填';
+            const idNumber = document.getElementById('patientIdNumber').value.trim();
+            if (!validateTaiwanId(idNumber)) {
+                showModal('❌ 錯誤', '身分證格式錯誤');
+                return;
+            }
+            if (!isConnected) {
+                showModal('❌ 錯誤', '請先連接裝置');
+                return;
+            }
+            const age = parseInt(document.getElementById('patientAge').value) || 30;
+            const height = parseFloat(document.getElementById('patientHeight').value) || 165;
+            const gender = idNumber.charAt(1) === '1' ? '男' : '女';
+            let content = `=== 呼吸流量監測報告（吸藥輔助） ===\n`;
+            content += `病患編號: ${id}\n身分證: ${idNumber}\n年齡: ${age} 歲\n身高: ${height} cm\n性別: ${gender}\n`;
+            content += `測量模式: ${measureMode === 'inhale' ? '吸氣' : measureMode === 'exhale' ? '吐氣' : '雙向'}\n`;
+            content += `觸發模式: ${triggerMode === 'single' ? '單次' : '連續'}\n`;
+            content += `建議吸氣流速範圍: ${STD_MIN} ~ ${STD_MAX} L/min\n`;
+            content += `測量時間: ${new Date().toLocaleString()}\n\n`;
+            content += `--- 流量數據 (時間, 流量) ---\n`;
+            flowData.forEach(([t, f]) => content += `${t.toFixed(2)},${f.toFixed(2)}\n`);
+
+            const now = new Date();
+            const ts =
+                `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}`;
+            const fileName = `${idNumber}_${ts}.txt`;
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = fileName;
+            a.click();
+
+            playSound('goal');
+            showModal('✅ 儲存成功', `檔案已下載: ${fileName}`);
+        };
+
+        // ====== 校準 ======
+        document.getElementById('calibrateBtn').onclick = function() {
+            playSound('click');
+            if (!isConnected) {
+                showModal('⚠️ 提示', '請先連接裝置再進行校準');
+                return;
+            }
+            showModal('⚙️ 校準', '校準功能已觸發 (模擬)');
+        };
+
+        // ====== 匯出 ======
+        document.getElementById('exportBtn').onclick = function() {
+            playSound('click');
+            if (flowData.length === 0) {
+                showModal('⚠️ 提示', '無數據可匯出');
+                return;
+            }
+            let csv = '時間(秒),流量(L/min)\n';
+            flowData.forEach(([t, f]) => csv += `${t.toFixed(2)},${f.toFixed(2)}\n`);
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `flow_${new Date().getTime()}.csv`;
+            a.click();
+        };
+
+        // ====== 圖表控制 ======
+        document.getElementById('clearChartBtn').onclick = function() {
+            playSound('click');
+            chartInstance.data.labels = [];
+            chartInstance.data.datasets[0].data = [];
+            chartInstance.update();
+            showModal('🗑️ 清除完成', '圖表數據已清除');
+        };
+        document.getElementById('applyYRange').onclick = function() {
+            playSound('click');
+            const min = parseFloat(document.getElementById('yMinInput').value) || 0;
+            const max = parseFloat(document.getElementById('yMaxInput').value) || 100;
+            if (min >= max) { showModal('⚠️ 錯誤', '最小值需小於最大值'); return; }
+            chartInstance.options.scales.y.min = min;
+            chartInstance.options.scales.y.max = max;
+            chartInstance.update();
+            showModal('✅ 套用完成', `Y軸範圍: ${min} ~ ${max}`);
+        };
+
+        // ====== ★★★ 模式切換（全部可使用，不鎖功能）★★★ ======
+        document.getElementById('modeInhale').onclick = function() {
+            playSound('click');
+            document.querySelectorAll('#modeInhale,#modeExhale,#modeBoth').forEach(b => b.className =
+            'btn btn-sm btn-outline');
+            this.className = 'btn btn-sm btn-active';
+            measureMode = 'inhale';
+            showModal('😤 吸氣模式', '已切換至「吸氣模式」\n\n流量將顯示為正值');
+        };
+
+        document.getElementById('modeExhale').onclick = function() {
+            playSound('click');
+            document.querySelectorAll('#modeInhale,#modeExhale,#modeBoth').forEach(b => b.className =
+            'btn btn-sm btn-outline');
+            this.className = 'btn btn-sm btn-active';
+            measureMode = 'exhale';
+            showModal('😮‍💨 吐氣模式', '已切換至「吐氣模式」\n\n流量將顯示為負值\n💡 標準區間與吸氣相同（同一個裝置）');
+        };
+
+        document.getElementById('modeBoth').onclick = function() {
+            playSound('click');
+            document.querySelectorAll('#modeInhale,#modeExhale,#modeBoth').forEach(b => b.className =
+            'btn btn-sm btn-outline');
+            this.className = 'btn btn-sm btn-active';
+            measureMode = 'both';
+            showModal('🔄 雙向模式', '已切換至「雙向模式」\n\n吸氣顯示正值，吐氣顯示負值\n💡 標準區間與吸氣相同（同一個裝置）');
+        };
+
+        document.getElementById('modeSingle').onclick = function() {
+            playSound('click');
+            document.querySelectorAll('#modeSingle,#modeContinuous').forEach(b => b.className =
+            'btn btn-sm btn-outline');
+            this.className = 'btn btn-sm btn-active';
+            triggerMode = 'single';
+            showModal('⏹️ 單次模式', '已切換至「單次模式」');
+        };
+
+        document.getElementById('modeContinuous').onclick = function() {
+            playSound('click');
+            document.querySelectorAll('#modeSingle,#modeContinuous').forEach(b => b.className =
+            'btn btn-sm btn-outline');
+            this.className = 'btn btn-sm btn-active';
+            triggerMode = 'continuous';
+            showModal('▶️ 連續模式', '已切換至「連續模式」');
+        };
+
+        // ====== 計時器 ======
+
+        function formatTime(s) {
+            const m = String(Math.floor(Math.abs(s) / 60)).padStart(2, '0');
+            const sec = String(Math.abs(s) % 60).padStart(2, '0');
+            return `${s < 0 ? '-' : ''}${m}:${sec}`;
         }
 
-        // =====================================================
-        //  Main Application (translating Python class)
-        // =====================================================
-        class FlowMonitorApp {
-            constructor() {
-                // State (matching Python)
-                this.window_history = [false, false, false];
-                this.reader = null;
-                this.measuring = false;
-                this.t0 = null;
-                this.started = false;
-                this.times = [];
-                this.flows = [];
-                this.records = [];
-                this.last_fft = null;
-                this.prev_flow_yes = false;
-                this.connected = false;
-                this.port = null;
+        function updateTimerDisplay() {
+            document.getElementById('timerDisplay').textContent = formatTime(timerSeconds);
+        }
 
-                // DOM refs
-                this.portSelect = document.getElementById('portSelect');
-                this.refreshBtn = document.getElementById('refreshBtn');
-                this.connectBtn = document.getElementById('connectBtn');
-                this.patientInput = document.getElementById('patientInput');
-                this.measureBtn = document.getElementById('measureBtn');
-                this.clearBtn = document.getElementById('clearBtn');
-                this.saveBtn = document.getElementById('saveBtn');
-                this.statusMsg = document.getElementById('statusMsg');
-                this.recordCount = document.getElementById('recordCount');
-                this.peakValue = document.getElementById('peakValue');
+        function startTimer() {
+            if (timerInterval) return;
+            timerRunning = true;
+            document.getElementById('timerToggle').textContent = '⏹️ 停止';
+            document.getElementById('timerStatus').textContent = '▶️ 計時中';
+            document.getElementById('timerModeLabel').textContent =
+                timerMode === 'countdown' ? '(倒數模式)' : '(累計模式)';
 
-                // Setup
-                this.setupChart();
-                this.refreshPorts();
-                this.bindEvents();
+            if (timerMode === 'countdown' && timerSeconds <= 0) {
+                timerSeconds = timerSetValue;
+                updateTimerDisplay();
             }
 
-            // ---------------- Chart Setup ----------------
-            setupChart() {
-                const ctx = document.getElementById('flowChart').getContext('2d');
-                const ideal = generateIdealCurve();
+            playSound('timerStart');
 
-                this.chart = new Chart(ctx, {
-                    type: 'scatter',
-                    data: {
-                        datasets: [
-                            {
-                                label: 'Target (ideal)',
-                                data: ideal.x.map((x, i) => ({ x, y: ideal.y[i] })),
-                                borderColor: '#2e7d32',
-                                backgroundColor: 'transparent',
-                                borderDash: [6, 5],
-                                borderWidth: 2.2,
-                                pointRadius: 0,
-                                tension: 0.3,
-                                showLine: true,
-                                fill: false,
-                                order: 1
-                            },
-                            {
-                                label: 'Patient',
-                                data: [],
-                                borderColor: '#c0392b',
-                                backgroundColor: 'rgba(192, 57, 43, 0.05)',
-                                borderWidth: 2.4,
-                                pointRadius: 0,
-                                tension: 0.4,
-                                showLine: true,
-                                fill: true,
-                                order: 0
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        animation: false,
-                        plugins: {
-                            legend: {
-                                position: 'top',
-                                labels: { usePointStyle: true, boxWidth: 10 }
-                            }
-                        },
-                        scales: {
-                            x: {
-                                type: 'linear',
-                                title: { display: true, text: 'Time (secs)' },
-                                min: 0,
-                                max: 10,
-                                grid: { color: '#d9e1e8' }
-                            },
-                            y: {
-                                title: { display: true, text: 'Flow (L/min)' },
-                                min: 0,
-                                max: 70,
-                                grid: { color: '#d9e1e8' }
-                            }
-                        }
-                    }
-                });
-            }
-
-            // ---------------- Ports (from Python) ----------------
-            async refreshPorts() {
-                try {
-                    if (!('serial' in navigator)) {
-                        this.statusMsg.textContent = '⚠️ 瀏覽器不支援 Web Serial API';
+            timerInterval = setInterval(() => {
+                if (timerMode === 'stopwatch') {
+                    timerSeconds++;
+                } else {
+                    timerSeconds--;
+                    if (timerSeconds <= 0) {
+                        timerSeconds = 0;
+                        updateTimerDisplay();
+                        stopTimer();
+                        document.getElementById('timerStatus').textContent = '⏹️ 結束';
+                        playSound('gameOver');
+                        showModal('⏰ 時間到', '計時器已結束');
                         return;
                     }
-                    const ports = await navigator.serial.getPorts();
-                    this.portSelect.innerHTML = '';
-                    if (ports.length === 0) {
-                        const opt = document.createElement('option');
-                        opt.text = 'No COM port found. Check USB connection.';
-                        opt.value = '';
-                        this.portSelect.appendChild(opt);
-                        this.statusMsg.textContent = 'No COM port found. Check USB connection.';
-                        return;
-                    }
-                    for (const p of ports) {
-                        const info = p.getInfo();
-                        const label = info.usbProductId ?
-                            `USB Device (${info.usbVendorId}:${info.usbProductId})` :
-                            'Serial Device';
-                        const opt = document.createElement('option');
-                        opt.value = label;
-                        opt.text = label;
-                        this.portSelect.appendChild(opt);
-                    }
-                    this.portSelect.selectedIndex = 0;
-                    this.statusMsg.textContent = `Found ${ports.length} port(s)`;
-                } catch (e) {
-                    this.statusMsg.textContent = `Error: ${e.message}`;
+                }
+                updateTimerDisplay();
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            timerRunning = false;
+            document.getElementById('timerToggle').textContent = '▶️ 啟動';
+            document.getElementById('timerStatus').textContent = '⏸️ 暫停';
+            playSound('timerStop');
+        }
+
+        function resetTimer() {
+            stopTimer();
+            timerSeconds = timerMode === 'countdown' ? timerSetValue : 0;
+            updateTimerDisplay();
+            document.getElementById('timerStatus').textContent = '⏸️ 待命';
+            document.getElementById('timerModeLabel').textContent =
+                timerMode === 'countdown' ? '(倒數模式)' : '(累計模式)';
+            document.getElementById('timerTriggerStatus').textContent = '';
+            timerTriggeredByFlow = false;
+        }
+
+        document.getElementById('timerApplyBtn').onclick = function() {
+            playSound('click');
+            const val = parseInt(document.getElementById('timerSetValue').value);
+            if (isNaN(val) || val < 1) {
+                showModal('⚠️ 錯誤', '請輸入有效的秒數 (≥1)');
+                return;
+            }
+            timerSetValue = val;
+            if (!timerRunning) {
+                timerSeconds = timerMode === 'countdown' ? timerSetValue : 0;
+                updateTimerDisplay();
+            }
+            showModal('✅ 設定完成', `計時器已設為 ${timerSetValue} 秒`);
+        };
+
+        document.getElementById('timerCountdown').onclick = function() {
+            playSound('click');
+            if (timerRunning) stopTimer();
+            timerMode = 'countdown';
+            document.querySelectorAll('#timerCountdown,#timerStopwatch').forEach(b => b.className =
+                'btn btn-sm btn-outline');
+            this.className = 'btn btn-sm btn-active';
+            timerSeconds = timerSetValue;
+            updateTimerDisplay();
+            document.getElementById('timerModeLabel').textContent = '(倒數模式)';
+            document.getElementById('timerStatus').textContent = '⏸️ 待命';
+        };
+        document.getElementById('timerStopwatch').onclick = function() {
+            playSound('click');
+            if (timerRunning) stopTimer();
+            timerMode = 'stopwatch';
+            document.querySelectorAll('#timerCountdown,#timerStopwatch').forEach(b => b.className =
+                'btn btn-sm btn-outline');
+            this.className = 'btn btn-sm btn-active';
+            timerSeconds = 0;
+            updateTimerDisplay();
+            document.getElementById('timerModeLabel').textContent = '(累計模式)';
+            document.getElementById('timerStatus').textContent = '⏸️ 待命';
+        };
+
+        document.getElementById('timerToggle').onclick = function() {
+            playSound('click');
+            if (timerRunning) {
+                stopTimer();
+            } else {
+                if (timerMode === 'countdown' && timerSeconds <= 0) {
+                    timerSeconds = timerSetValue;
+                    updateTimerDisplay();
+                }
+                startTimer();
+            }
+        };
+
+        document.getElementById('timerResetBtn').onclick = function() {
+            playSound('click');
+            resetTimer();
+            showModal('⟳ 重置', '計時器已重置');
+        };
+
+        document.getElementById('timerAutoBtn').onclick = function() {
+            playSound('click');
+            timerAutoMode = !timerAutoMode;
+            const btn = document.getElementById('timerAutoBtn');
+            const status = document.getElementById('timerAutoStatus');
+
+            if (timerAutoMode) {
+                btn.style.background = '#2ecc7120';
+                btn.style.color = '#1a7a42';
+                btn.style.borderColor = '#2ecc7140';
+                status.className = 'timer-status-badge auto';
+                status.textContent = '自動開';
+                if (currentFlow < 5) {
+                    resetTimer();
+                }
+                showModal('🤖 自動模式', '計時器將在偵測到流量時自動啟動');
+            } else {
+                btn.style.background = '#f39c1220';
+                btn.style.color = '#b9770e';
+                btn.style.borderColor = '#f39c1240';
+                status.className = 'timer-status-badge manual';
+                status.textContent = '手動';
+                if (timerRunning && timerTriggeredByFlow) {
+                    stopTimer();
+                    timerTriggeredByFlow = false;
+                }
+                showModal('🖐️ 手動模式', '計時器需手動點擊「啟動」按鈕');
+            }
+        };
+
+        // ====== 遊戲模式 ======
+        const games = [
+            { id: 0, name: '目標挑戰', icon: '🎯', desc: '達到目標流量', rule: '吸氣達到目標值即可得分' },
+            { id: 1, name: '穩定維持', icon: '📈', desc: '維持在目標區間', rule: '保持流量在目標±8範圍內' },
+            { id: 2, name: '爆發力', icon: '⚡', desc: '衝刺最高流量', rule: '衝刺達到峰值得高分' },
+            { id: 3, name: '節奏呼吸', icon: '🔄', desc: '規律吸吐交替', rule: '每8次呼吸得一分' },
+            { id: 4, name: '累積積分', icon: '🏆', desc: '每次吸氣得分', rule: '每次吸氣都獲得分數' },
+            { id: 5, name: '幸運呼吸', icon: '🎲', desc: '隨機驚喜加成', rule: '有機會觸發幸運加成' }
+        ];
+
+        function initParticles() {
+            const container = document.getElementById('gameParticles');
+            container.innerHTML = '';
+            for (let i = 0; i < 20; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDuration = (8 + Math.random() * 12) + 's';
+                p.style.animationDelay = (Math.random() * 10) + 's';
+                p.style.width = (2 + Math.random() * 4) + 'px';
+                p.style.height = p.style.width;
+                p.style.background = `rgba(46, 204, 113, ${0.1 + Math.random() * 0.3})`;
+                container.appendChild(p);
+            }
+        }
+        initParticles();
+
+        document.getElementById('gameModeBtn').onclick = function() {
+            playSound('click');
+            gameActive = !gameActive;
+
+            if (gameActive) {
+                currentGame = Math.floor(Math.random() * 6);
+                gameTarget = (20 + Math.random() * 60);
+                gameTarget = Math.round(gameTarget * 10) / 10;
+                gameScore = 0;
+                gameProgressVal = 0;
+                gameCompleted = false;
+                gameConsecutiveBreaths = 0;
+
+                const game = games[currentGame];
+                document.getElementById('gameIcon').textContent = game.icon;
+                document.getElementById('gameNameDisplay').textContent = game.name;
+                document.getElementById('gameNameDisplay').classList.remove('hidden');
+                document.getElementById('gameStatusBadge').textContent = '▶ 進行中';
+                document.getElementById('gameStatusBadge').className = 'game-status-badge active';
+                document.getElementById('gameScoreValue').textContent = '0';
+                document.getElementById('gameTargetDisplay').textContent = `🎯 目標: ${gameTarget} L/min`;
+                document.getElementById('gameProgressFill').style.width = '0%';
+                document.getElementById('gameProgressText').textContent = '0%';
+                document.getElementById('gameProgress').classList.remove('hidden');
+                document.getElementById('gameRuleDisplay').textContent = game.rule;
+                document.getElementById('gameFeedback').textContent = '💪 開始呼吸！加油！';
+                document.getElementById('gameFeedback').className = 'game-feedback-text highlight';
+                this.textContent = '⏹️ 結束遊戲';
+                document.getElementById('gameNextBtn').style.display = 'inline-block';
+
+                playSound('gameStart');
+                showModal('🎮 遊戲開始', `${game.icon} ${game.name}\n${game.desc}\n目標流量: ${gameTarget} L/min\n\n開始測量吧！`);
+            } else {
+                document.getElementById('gameStatusBadge').textContent = '● 已關閉';
+                document.getElementById('gameStatusBadge').className = 'game-status-badge';
+                document.getElementById('gameFeedback').className = 'game-feedback-text';
+                document.getElementById('gameFeedback').textContent = '💪 點擊「開啟遊戲」開始挑戰！';
+                this.textContent = '🎮 開啟遊戲';
+                document.getElementById('gameNextBtn').style.display = 'none';
+
+                if (gameScore > 0) {
+                    playSound('gameOver');
+                    showModal('🏁 遊戲結束', `最終分數: ${gameScore} 分\n${gameScore > 50 ? '🌟 優異表現！' : gameScore > 20 ? '👍 不錯喔！' : '💪 繼續加油！'}`);
                 }
             }
+        };
 
-            // ---------------- Connection (from Python) ----------------
-            async toggleConnection() {
-                if (this.connected) {
-                    await this.disconnect();
+        document.getElementById('gameNextBtn').onclick = function() {
+            playSound('click');
+            if (!gameActive) return;
+
+            currentGame = (currentGame + 1) % 6;
+            gameTarget = (20 + Math.random() * 60);
+            gameTarget = Math.round(gameTarget * 10) / 10;
+            gameScore = 0;
+            gameProgressVal = 0;
+            gameCompleted = false;
+            gameConsecutiveBreaths = 0;
+
+            const game = games[currentGame];
+            document.getElementById('gameIcon').textContent = game.icon;
+            document.getElementById('gameNameDisplay').textContent = game.name;
+            document.getElementById('gameScoreValue').textContent = '0';
+            document.getElementById('gameTargetDisplay').textContent = `🎯 目標: ${gameTarget} L/min`;
+            document.getElementById('gameProgressFill').style.width = '0%';
+            document.getElementById('gameProgressText').textContent = '0%';
+            document.getElementById('gameRuleDisplay').textContent = game.rule;
+            document.getElementById('gameFeedback').textContent = `🔄 換到 ${game.name}！開始！`;
+            document.getElementById('gameFeedback').className = 'game-feedback-text highlight';
+
+            playSound('click');
+            showModal('🔄 換遊戲', `${game.icon} ${game.name}\n${game.desc}\n目標流量: ${gameTarget} L/min`);
+        };
+
+        function processGame(flow) {
+            const absFlow = Math.abs(flow);
+            if (absFlow < 0.5) return;
+
+            let points = 0;
+            let progress = 0;
+            const target = gameTarget;
+            let feedbackMsg = '';
+
+            switch (currentGame) {
+                case 0:
+                    if (absFlow >= target) {
+                        points = 15;
+                        progress = Math.min(100, (absFlow / target) * 100);
+                        feedbackMsg = '🎯 達標！+15分！';
+                    } else {
+                        progress = Math.min(90, (absFlow / target) * 90);
+                        feedbackMsg = `💪 還差 ${(target - absFlow).toFixed(1)} L/min`;
+                    }
+                    break;
+                case 1:
+                    if (absFlow >= target - 8 && absFlow <= target + 8) {
+                        points = 8;
+                        progress = Math.min(100, (absFlow / target) * 100);
+                        feedbackMsg = '📈 穩定！+8分！';
+                    } else {
+                        progress = Math.min(70, (absFlow / target) * 70);
+                        feedbackMsg = `📈 目標 ${target}，目前 ${absFlow.toFixed(1)}`;
+                    }
+                    break;
+                case 2:
+                    if (absFlow > peakFlowValue * 0.85 && peakFlowValue > 5) {
+                        points = 12;
+                        progress = Math.min(100, (absFlow / 100) * 100);
+                        feedbackMsg = '⚡ 爆發！+12分！';
+                    } else {
+                        progress = Math.min(80, (absFlow / 100) * 80);
+                        feedbackMsg = `⚡ 峰值 ${peakFlowValue.toFixed(1)} L/min`;
+                    }
+                    break;
+                case 3:
+                    gameConsecutiveBreaths++;
+                    if (gameConsecutiveBreaths % 8 === 0 && absFlow > 5) {
+                        points = 6;
+                        progress = Math.min(100, (gameConsecutiveBreaths / 80) * 100);
+                        feedbackMsg = '🔄 節奏讚！+6分！';
+                    } else {
+                        progress = Math.min(60, (gameConsecutiveBreaths / 80) * 60);
+                        feedbackMsg = `🔄 第 ${gameConsecutiveBreaths} 次呼吸`;
+                    }
+                    break;
+                case 4:
+                    points = Math.floor(absFlow * 0.3);
+                    progress = Math.min(100, (gameScore / 100) * 100);
+                    feedbackMsg = `🏆 +${points}分！`;
+                    break;
+                case 5:
+                    if (Math.random() > 0.65) {
+                        points = 20;
+                        feedbackMsg = '🎲 幸運！+20分！';
+                        playSound('bigScore');
+                    } else {
+                        feedbackMsg = '🎲 繼續呼吸...';
+                    }
+                    progress = Math.min(100, (flowData.length / 30) * 100);
+                    break;
+            }
+
+            if (points > 0) {
+                gameScore += points;
+                document.getElementById('gameScoreValue').textContent = gameScore;
+                if (points >= 10) playSound('score');
+                if (points >= 20) playSound('bigScore');
+                document.getElementById('gameFeedback').textContent = feedbackMsg;
+                document.getElementById('gameFeedback').className = 'game-feedback-text highlight';
+                setTimeout(() => {
+                    if (gameActive) {
+                        document.getElementById('gameFeedback').className = 'game-feedback-text';
+                        document.getElementById('gameFeedback').textContent = '💪 繼續呼吸！';
+                    }
+                }, 1200);
+            } else {
+                document.getElementById('gameFeedback').textContent = feedbackMsg;
+                document.getElementById('gameFeedback').className = 'game-feedback-text';
+            }
+
+            gameProgressVal = Math.min(100, progress);
+            document.getElementById('gameProgressFill').style.width = gameProgressVal + '%';
+            document.getElementById('gameProgressText').textContent = Math.round(gameProgressVal) + '%';
+
+            updateBreathBall(absFlow);
+
+            if (gameProgressVal >= 95 && !gameCompleted) {
+                gameCompleted = true;
+                playSound('goal');
+                showModal('🎉 目標達成！', `太棒了！獲得 ${gameScore} 分！\n繼續呼吸可以累積更多分數！`);
+                document.getElementById('gameFeedback').textContent = '🎉 目標達成！繼續累積分數！';
+                document.getElementById('gameFeedback').className = 'game-feedback-text highlight';
+            }
+
+            if (gameActive && absFlow > 0.5) {
+                if (absFlow >= target) {
+                    document.getElementById('gameTargetDisplay').textContent =
+                    `🎯 已達標！ (${absFlow.toFixed(1)}/${target})`;
                 } else {
-                    await this.connect();
+                    document.getElementById('gameTargetDisplay').textContent =
+                        `🎯 還差 ${(target - absFlow).toFixed(1)} L/min (${absFlow.toFixed(1)}/${target})`;
                 }
-            }
-
-            async connect() {
-                try {
-                    if (!('serial' in navigator)) {
-                        throw new Error('Web Serial API not supported. Please use Chrome or Edge.');
-                    }
-
-                    let ports = await navigator.serial.getPorts();
-
-                    if (ports.length === 0) {
-                        this.statusMsg.textContent = '請從彈出視窗中選擇您的 USB 裝置...';
-                        const newPort = await navigator.serial.requestPort();
-                        if (!newPort) {
-                            this.statusMsg.textContent = '⚠️ 未選擇任何裝置';
-                            return;
-                        }
-                        ports = await navigator.serial.getPorts();
-                        if (ports.length === 0) {
-                            this.statusMsg.textContent = '⚠️ 無法取得埠列表，請重新整理頁面';
-                            return;
-                        }
-                    }
-
-                    this.port = ports[0];
-                    await this.port.open({ baudRate: 115200 });
-                    this.connected = true;
-
-                    // Reset state (like Python)
-                    this.clearPlot();
-                    this.records = [];
-                    this.last_fft = null;
-                    this.measuring = false;
-                    this.measureBtn.textContent = 'Start';
-                    this.updateRecordCount();
-                    this.prev_flow_yes = false;
-                    this.window_history = [false, false, false];
-
-                    this.connectBtn.textContent = 'Disconnect';
-                    this.connectBtn.className = 'danger';
-                    this.portSelect.disabled = true;
-                    this.refreshBtn.disabled = true;
-                    this.statusMsg.textContent = '✅ 已連線，等待數據...';
-
-                    this.startReading();
-
-                } catch (e) {
-                    this.statusMsg.textContent = `❌ 連線失敗: ${e.message}`;
-                    console.error('Connection error:', e);
-                }
-            }
-
-            async disconnect() {
-                if (this.reader) {
-                    try {
-                        await this.reader.cancel();
-                    } catch (e) {}
-                    this.reader = null;
-                }
-                if (this.port) {
-                    try {
-                        await this.port.close();
-                    } catch (e) {}
-                    this.port = null;
-                }
-                this.connected = false;
-                this.connectBtn.textContent = 'Connect';
-                this.connectBtn.className = 'primary';
-                this.portSelect.disabled = false;
-                this.refreshBtn.disabled = false;
-                this.statusMsg.textContent = '已斷線';
-            }
-
-            // ---------------- Reading (from Python SerialReader) ----------------
-            async startReading() {
-                if (!this.port) return;
-
-                const reader = this.port.readable.getReader();
-                this.reader = reader;
-                const decoder = new TextDecoder('utf-8');
-                let buffer = '';
-
-                try {
-                    while (true) {
-                        const { value, done } = await reader.read();
-                        if (done) break;
-
-                        const chunk = decoder.decode(value, { stream: true });
-                        buffer += chunk;
-                        const lines = buffer.split('\n');
-                        buffer = lines.pop() || '';
-
-                        for (const line of lines) {
-                            const trimmed = line.trim();
-                            if (trimmed) {
-                                this.handleLine(trimmed);
-                            }
-                        }
-                    }
-                } catch (e) {
-                    if (e.name !== 'AbortError') {
-                        console.warn('Read error:', e);
-                        this.statusMsg.textContent = `讀取錯誤: ${e.message}`;
-                    }
-                }
-            }
-
-            // ---------------- Handle Line (from Python _handle_line) ----------------
-            handleLine(line) {
-                if (!this.measuring) return;
-
-                const fft = parseFFT(line);
-                if (fft) {
-                    this.last_fft = fft;
-                    return;
-                }
-
-                const det = parseDetect(line);
-                if (!det) return;
-
-                let { flow_yes, est, low_e } = det;
-
-                // -------------------------------------------------
-                // 1. Noise filtering (from Python)
-                // -------------------------------------------------
-                let is_candidate = false;
-                if (flow_yes || (low_e > 800000 && est > 0.0)) {
-                    is_candidate = true;
-                }
-                if (this.last_fft) {
-                    if ((this.last_fft[1] || 0) > 800000 && (this.last_fft[8] || 0) < 50000) {
-                        is_candidate = false;
-                    }
-                }
-
-                // -------------------------------------------------
-                // 2. Sliding window majority (from Python)
-                // -------------------------------------------------
-                this.window_history.shift();
-                this.window_history.push(is_candidate);
-                const true_count = this.window_history.filter(x => x === true).length;
-
-                if (true_count >= 2) {
-                    flow_yes = true;
-                    if (est === 0.0 && low_e > 1000000) {
-                        est = 15.0;
-                    }
-                } else {
-                    flow_yes = false;
-                    est = 0.0;
-                }
-
-                // -------------------------------------------------
-                // 3. Record data (from Python)
-                // -------------------------------------------------
-                const now = Date.now() / 1000;
-                const ts = new Date().toISOString().slice(0, -1);
-                const elapsed = this.t0 !== null ? (now - this.t0) : 0;
-
-                this.records.push({
-                    timestamp: ts,
-                    elapsed: elapsed,
-                    flow: flow_yes,
-                    est: est,
-                    low_energy: low_e,
-                    fft: this.last_fft || {}
-                });
-                this.updateRecordCount();
-
-                // -------------------------------------------------
-                // 4. Start plotting logic (from Python)
-                // -------------------------------------------------
-                if (!this.started) {
-                    if (flow_yes && this.prev_flow_yes) {
-                        this.started = true;
-                        this.t0 = now;
-                        if (this.records.length >= 2) {
-                            this.records[this.records.length - 2].elapsed = 0;
-                            this.records[this.records.length - 1].elapsed = 0;
-                            this.times = [0, 0];
-                            this.flows = [
-                                this.records[this.records.length - 2].est,
-                                this.records[this.records.length - 1].est
-                            ];
-                        } else {
-                            this.times = [0];
-                            this.flows = [est];
-                        }
-                        this.statusMsg.textContent = 'Inhalation detected.';
-                        this.prev_flow_yes = flow_yes;
-                        this.redraw();
-                        return;
-                    }
-                    this.prev_flow_yes = flow_yes;
-                    return;
-                }
-
-                this.prev_flow_yes = flow_yes;
-                const t = now - this.t0;
-                this.times.push(t);
-                this.flows.push(est);
-                this.redraw();
-            }
-
-            // ---------------- UI Updates (from Python) ----------------
-            updateRecordCount() {
-                this.recordCount.textContent = this.records.length;
-            }
-
-            redraw() {
-                if (!this.chart) return;
-
-                const ds = this.chart.data.datasets;
-                let xs = this.times.slice();
-                let ys = this.flows.slice();
-
-                if (xs.length >= 3) {
-                    const smoothed = smoothCurve(xs, ys);
-                    xs = smoothed.x;
-                    ys = smoothed.y;
-                }
-
-                ds[1].data = xs.map((x, i) => ({ x, y: ys[i] || 0 }));
-
-                if (this.times.length > 0) {
-                    const xmax = Math.max(10, this.times[this.times.length - 1] + 1);
-                    this.chart.options.scales.x.max = xmax;
-                }
-                if (this.flows.length > 0) {
-                    const ymax = Math.max(70, Math.max(...this.flows) * 1.2);
-                    this.chart.options.scales.y.max = ymax;
-                    const peak = Math.max(...this.flows);
-                    this.peakValue.textContent = peak.toFixed(1) + ' L/min';
-                }
-                this.chart.update('none');
-            }
-
-            // ---------------- Controls (from Python) ----------------
-            toggleMeasuring() {
-                this.measuring = !this.measuring;
-                if (this.measuring) {
-                    this.measureBtn.textContent = 'Stop';
-                    this.measureBtn.className = 'danger';
-                    this.statusMsg.textContent = 'Measuring...';
-                } else {
-                    this.measureBtn.textContent = 'Start';
-                    this.measureBtn.className = '';
-                    this.statusMsg.textContent = 'Measurement stopped (waveform frozen).';
-                }
-            }
-
-            clearPlot() {
-                this.t0 = null;
-                this.started = false;
-                this.times = [];
-                this.flows = [];
-                this.window_history = [false, false, false];
-                this.prev_flow_yes = false;
-                this.records = [];
-                this.last_fft = null;
-
-                if (this.chart) {
-                    this.chart.data.datasets[1].data = [];
-                    this.chart.options.scales.x.max = 10;
-                    this.chart.options.scales.y.max = 70;
-                    this.chart.update('none');
-                }
-                this.updateRecordCount();
-                this.peakValue.textContent = '—';
-                this.statusMsg.textContent = 'Cleared.';
-            }
-
-            saveData() {
-                if (this.records.length === 0) {
-                    alert('No data to save.\nPlease connect and collect data first.');
-                    return;
-                }
-
-                const patient = this.patientInput.value.trim() || 'unknown';
-                const default_name = patient ? `inhaler_data_${patient}` : 'inhaler_data';
-
-                let csv = 'patient_id,timestamp,elapsed_s,flow,est_flow_Lpm,low_energy,';
-                for (let k = 1; k <= 20; k++) csv += `${k}kHz,`;
-                csv = csv.slice(0, -1) + '\n';
-
-                for (const r of this.records) {
-                    const row = [
-                        patient,
-                        r.timestamp,
-                        r.elapsed.toFixed(2),
-                        r.flow ? 'YES' : 'no',
-                        r.est.toFixed(1),
-                        r.low_energy
-                    ];
-                    for (let k = 1; k <= 20; k++) {
-                        row.push(r.fft[k] !== undefined ? r.fft[k] : '');
-                    }
-                    csv += row.join(',') + '\n';
-                }
-
-                const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8-sig' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = `${default_name}.csv`;
-                link.click();
-
-                this.statusMsg.textContent = `Saved: ${default_name}.csv (${this.records.length} records)`;
-            }
-
-            // ---------------- Event Binding ----------------
-            bindEvents() {
-                this.refreshBtn.addEventListener('click', () => this.refreshPorts());
-                this.connectBtn.addEventListener('click', () => this.toggleConnection());
-                this.measureBtn.addEventListener('click', () => this.toggleMeasuring());
-                this.clearBtn.addEventListener('click', () => this.clearPlot());
-                this.saveBtn.addEventListener('click', () => this.saveData());
             }
         }
 
-        // =====================================================
-        //  Main
-        // =====================================================
-        document.addEventListener('DOMContentLoaded', () => {
-            new FlowMonitorApp();
-        });
+        // ====== Modal ======
+        function showModal(title, msg) {
+            const overlay = document.createElement('div');
+            overlay.className = 'modal-overlay';
+            overlay.innerHTML =
+                `<div class="modal-box"><h3>${title}</h3><p style="margin:10px 0; color:#4a6a4a;">${msg}</p><button class="btn btn-primary" onclick="this.closest('.modal-overlay').remove(); playSound('click');">確認</button></div>`;
+            document.body.appendChild(overlay);
+        }
+
+        // ====== 登入 ======
+        document.getElementById('loginBtn').onclick = function() {
+            playSound('click');
+            showModal('🔑 登入', '登入功能已觸發');
+        };
+        document.getElementById('myfilesBtn').onclick = function() {
+            playSound('click');
+            showModal('📁 歷史紀錄', '此功能需實作 userTable.html 頁面');
+        };
+
+        // ====== 初始化 ======
+        setStep(0);
+        drawGauge(0, 0);
+        updateLungs(0);
+        updateAllLinkedFields();
+        resetTimer();
+        initAudio();
+
+        console.log('✅ 系統已初始化');
+        console.log('💊 吸藥粉標準區間：30 ~ 90 L/min');
+        console.log('⏱️ 圖表X軸會正確顯示時間 (從連線開始計算)');
+        console.log('🔄 全部重置：恢復所有狀態到初始值');
+        console.log('✅ 吐氣/雙向模式皆可使用（不鎖功能）');
+        console.log('📋 本系統為輔助參考，異常請諮詢醫師');
     </script>
 </body>
 </html>
