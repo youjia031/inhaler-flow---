@@ -161,11 +161,6 @@
             color: #b9770e;
             border-color: #f39c1240;
         }
-        .badge-future {
-            background: #95a5a620;
-            color: #5a6a6a;
-            border-color: #95a5a640;
-        }
         .gender-male {
             background: #3498db20 !important;
             color: #2471a3 !important;
@@ -448,17 +443,18 @@
             color: #b9770e;
             border: 1px solid #f39c1240;
         }
+        /* ===== 遊戲模式 - 豐富版 ===== */
         .game-overlay {
-            background: linear-gradient(145deg, #0f1f0f, #1a3a1a);
+            background: linear-gradient(145deg, #0a1a0a, #1a3a1a);
             border-radius: 20px;
             padding: 16px 20px;
             margin: 4px 0;
             color: #e8f0e8;
             border: 1px solid #2a5a2a;
-            box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.3);
+            box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.5);
             position: relative;
             overflow: hidden;
-            min-height: 160px;
+            min-height: 200px;
         }
         .game-overlay::before {
             content: '';
@@ -467,7 +463,7 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(ellipse at center, rgba(46, 204, 113, 0.03) 0%, transparent 70%);
+            background: radial-gradient(ellipse at center, rgba(46, 204, 113, 0.05) 0%, transparent 70%);
             pointer-events: none;
             animation: gameGlow 4s ease-in-out infinite;
         }
@@ -497,7 +493,7 @@
             gap: 12px;
         }
         .game-title-area .game-icon {
-            font-size: 32px;
+            font-size: 36px;
             animation: gameIconBounce 2s ease-in-out infinite;
         }
         @keyframes gameIconBounce {
@@ -510,7 +506,7 @@
             }
         }
         .game-title-area .game-name {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: 700;
             background: linear-gradient(135deg, #f1c40f, #e67e22);
             -webkit-background-clip: text;
@@ -519,8 +515,8 @@
         .game-title-area .game-rule {
             font-size: 13px;
             color: #a0c0a0;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 2px 12px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 2px 14px;
             border-radius: 20px;
         }
         .game-score-area {
@@ -529,10 +525,11 @@
             gap: 16px;
         }
         .game-score-area .score-display {
-            font-size: 32px;
+            font-size: 36px;
             font-weight: 800;
             color: #f1c40f;
             text-shadow: 0 0 30px rgba(241, 196, 15, 0.3);
+            font-variant-numeric: tabular-nums;
         }
         .game-score-area .score-label {
             font-size: 12px;
@@ -541,61 +538,164 @@
         .game-score-area .target-display {
             font-size: 14px;
             color: #e67e22;
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.4);
             padding: 4px 14px;
             border-radius: 20px;
         }
-        .game-body {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            margin-top: 10px;
+        /* ===== 遊戲視覺化 ===== */
+        .game-visual {
             position: relative;
+            height: 120px;
+            margin: 8px 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            overflow: hidden;
             z-index: 1;
-            flex-wrap: wrap;
         }
-        .game-breath-ball {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 35% 35%, #4a8a4a, #1a5a1a);
-            box-shadow: 0 0 40px rgba(46, 204, 113, 0.15), inset 0 -10px 30px rgba(0, 0, 0, 0.3);
-            transition: all 0.15s ease;
-            position: relative;
-            flex-shrink: 0;
-            border: 2px solid #2a6a2a;
-        }
-        .game-breath-ball .ball-inner {
+        .game-visual .game-char {
             position: absolute;
-            top: 15%;
-            left: 25%;
-            width: 40%;
-            height: 30%;
-            background: radial-gradient(ellipse, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
-            border-radius: 50%;
+            bottom: 10px;
+            font-size: 48px;
+            transition: all 0.2s ease;
+            z-index: 2;
+            user-select: none;
         }
-        .game-breath-ball .ball-label {
-            position: absolute;
-            bottom: -24px;
+        .game-visual .game-char.runner {
+            left: 10px;
+            transition: left 0.15s ease, transform 0.2s ease;
+        }
+        .game-visual .game-char.balloon {
             left: 50%;
             transform: translateX(-50%);
-            font-size: 11px;
-            color: #8a9a8a;
-            white-space: nowrap;
+            bottom: 10px;
+            font-size: 30px;
+            transition: all 0.15s ease;
         }
-        .game-breath-ball .flow-value-display {
-            position: absolute;
-            top: 50%;
+        .game-visual .game-char.arrow {
             left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 18px;
-            font-weight: 700;
-            color: white;
-            text-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            transform: translateX(-50%) rotate(0deg);
+            bottom: 10px;
+            font-size: 40px;
+            transition: all 0.15s ease;
+        }
+        .game-visual .game-char.surfer {
+            left: 10%;
+            bottom: 10px;
+            font-size: 42px;
+            transition: all 0.15s ease;
+        }
+        .game-visual .game-char.rocket {
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 10px;
+            font-size: 44px;
+            transition: bottom 0.15s ease;
+        }
+        .game-visual .game-char.juggler {
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 10px;
+            font-size: 40px;
+            transition: all 0.15s ease;
+        }
+        .game-visual .game-track {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+        }
+        .game-visual .game-track .track-progress {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #2ecc71, #f1c40f);
+            border-radius: 2px;
+            transition: width 0.15s ease;
+        }
+        .game-visual .game-target-marker {
+            position: absolute;
+            bottom: 0;
+            height: 30px;
+            width: 3px;
+            background: #e74c3c;
+            opacity: 0.6;
+            transition: left 0.3s ease;
+        }
+        .game-visual .game-target-marker::after {
+            content: '🎯';
+            position: absolute;
+            top: -22px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 14px;
+        }
+        /* 氣球特效 */
+        .balloon-burst {
+            position: absolute;
+            font-size: 60px;
+            animation: burstAnim 0.6s ease forwards;
+            pointer-events: none;
+            z-index: 10;
+        }
+        @keyframes burstAnim {
+            0% {
+                transform: scale(0.5);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.5);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+        /* 海浪動畫 */
+        .wave-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            overflow: hidden;
+        }
+        .wave {
+            position: absolute;
+            bottom: 0;
+            width: 200%;
+            height: 100%;
+            background: repeating-linear-gradient(90deg,
+                    rgba(46, 204, 113, 0.1) 0%,
+                    rgba(46, 204, 113, 0.2) 10%,
+                    rgba(46, 204, 113, 0.1) 20%);
+            border-radius: 40% 40% 0 0;
+            animation: waveMove 3s linear infinite;
+        }
+        .wave:nth-child(2) {
+            animation-delay: -1s;
+            opacity: 0.6;
+            height: 70%;
+        }
+        .wave:nth-child(3) {
+            animation-delay: -2s;
+            opacity: 0.3;
+            height: 50%;
+        }
+        @keyframes waveMove {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-50%);
+            }
         }
         .game-progress-section {
             flex: 1;
             min-width: 120px;
+            margin-top: 4px;
         }
         .game-progress-section .progress-label {
             font-size: 12px;
@@ -624,7 +724,7 @@
             align-items: center;
             gap: 12px;
             flex-wrap: wrap;
-            margin-top: 8px;
+            margin-top: 6px;
             position: relative;
             z-index: 1;
         }
@@ -691,6 +791,14 @@
         .game-status-badge.active {
             background: rgba(46, 204, 113, 0.2);
             color: #2ecc71;
+        }
+        .game-controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+            z-index: 1;
+            position: relative;
         }
         .modal-overlay {
             position: fixed;
@@ -770,12 +878,11 @@
             .game-score-area .score-display {
                 font-size: 24px;
             }
-            .game-breath-ball {
-                width: 60px;
-                height: 60px;
+            .game-visual {
+                height: 80px;
             }
-            .game-breath-ball .flow-value-display {
-                font-size: 14px;
+            .game-visual .game-char {
+                font-size: 32px !important;
             }
         }
     </style>
@@ -847,7 +954,7 @@
             <div class="disclaimer">⚠️ 本系統為輔助參考，若流速異常請諮詢專業醫師</div>
         </div>
 
-        <!-- ===== 模式設定（全部可以使用，不鎖功能） ===== -->
+        <!-- ===== 模式設定 ===== -->
         <div class="section-title">
             ⚙️ 模式設定
             <span class="badge-section">吸氣 / 吐氣 / 雙向 皆可切換</span>
@@ -1007,18 +1114,20 @@
             </div>
         </div>
 
-        <!-- ===== 遊戲模式 ===== -->
+        <!-- ===== ★★★ 全新遊戲模式 ★★★ ===== -->
         <div class="section-title">
             🎮 遊戲模式
-            <span class="badge-section">六款呼吸遊戲 / 即時計分 / 動態視覺</span>
+            <span class="badge-section">六款互動遊戲 / 即時視覺反饋</span>
         </div>
         <div class="game-overlay" id="gameOverlay">
             <div class="game-particles" id="gameParticles"></div>
+
+            <!-- 遊戲標題區 -->
             <div class="game-header">
                 <div class="game-title-area">
-                    <span class="game-icon" id="gameIcon">🎯</span>
-                    <span class="game-name" id="gameNameDisplay">目標挑戰</span>
-                    <span class="game-rule" id="gameRuleDisplay">點擊「開啟遊戲」開始</span>
+                    <span class="game-icon" id="gameIcon">🎈</span>
+                    <span class="game-name" id="gameNameDisplay">氣球爆破</span>
+                    <span class="game-rule" id="gameRuleDisplay">吸氣讓氣球變大，爆破得分！</span>
                     <span class="game-status-badge" id="gameStatusBadge">● 關閉</span>
                 </div>
                 <div class="game-score-area">
@@ -1027,24 +1136,38 @@
                     <span class="target-display" id="gameTargetDisplay">🎯 目標: --</span>
                 </div>
             </div>
-            <div class="game-body">
-                <div class="game-breath-ball" id="breathBall" style="transform: scale(1);">
-                    <div class="ball-inner"></div>
-                    <div class="flow-value-display" id="ballFlowValue">0.0</div>
-                    <div class="ball-label">即時流量</div>
+
+            <!-- 遊戲視覺化 -->
+            <div class="game-visual" id="gameVisual">
+                <div class="game-char balloon" id="gameChar">🎈</div>
+                <div class="game-target-marker" id="targetMarker" style="left:80%;"></div>
+                <div class="game-track">
+                    <div class="track-progress" id="trackProgress"></div>
                 </div>
-                <div class="game-progress-section">
-                    <div class="progress-label">
-                        <span>進度</span>
-                        <span id="gameProgressText">0%</span>
-                    </div>
-                    <div class="game-progress-track">
-                        <div class="game-progress-fill" id="gameProgressFill" style="width:0%;"></div>
-                    </div>
+                <!-- 海浪背景（衝浪遊戲用） -->
+                <div class="wave-container hidden" id="waveContainer">
+                    <div class="wave"></div>
+                    <div class="wave"></div>
+                    <div class="wave"></div>
                 </div>
             </div>
+
+            <!-- 進度條 -->
+            <div class="game-progress-section">
+                <div class="progress-label">
+                    <span>遊戲進度</span>
+                    <span id="gameProgressText">0%</span>
+                </div>
+                <div class="game-progress-track">
+                    <div class="game-progress-fill" id="gameProgressFill" style="width:0%;"></div>
+                </div>
+            </div>
+
+            <!-- 反饋與控制 -->
             <div class="game-feedback-area">
                 <span class="game-feedback-text" id="gameFeedback">💪 點擊「開啟遊戲」開始挑戰！</span>
+            </div>
+            <div class="game-controls">
                 <button class="btn btn-sm btn-gold" id="gameModeBtn">🎮 開啟遊戲</button>
                 <button class="btn btn-sm btn-outline" id="gameNextBtn" style="border-color:#5a7a5a; color:#8a9a8a; display:none;">🔄 換遊戲</button>
             </div>
@@ -1128,6 +1251,11 @@
                 case 'click':
                     playBeep(600, 0.05, 'sine', 0.05);
                     break;
+                case 'burst':
+                    playBeep(1000, 0.05);
+                    setTimeout(() => playBeep(800, 0.05), 50);
+                    setTimeout(() => playBeep(600, 0.08), 100);
+                    break;
                 case 'timerStart':
                     playBeep(880, 0.06);
                     setTimeout(() => playBeep(1100, 0.08), 80);
@@ -1144,7 +1272,7 @@
         // ====== 測試按鈕 ======
         document.getElementById('testBtn').onclick = function() {
             playSound('click');
-            alert('🧪 測試成功！\n\n✅ 所有按鈕在未連線時都可以點擊！\n✅ 音效系統已初始化\n✅ 遊戲畫面豐富可動\n✅ 肺部動畫即時反應\n✅ 性別圖示：男性♂藍色 / 女性♀紅色\n✅ 計時器自動連動：偵測到流量時自動啟動\n✅ 吸藥粉標準區間：30~90 L/min\n✅ 圖表X軸會正確顯示時間（從連線開始計算）\n✅ 全部重置：恢復所有狀態到初始值\n✅ 吐氣/雙向模式皆可使用（不鎖功能）');
+            alert('🧪 測試成功！\n\n✅ 全新六款互動遊戲！\n   🎈 氣球爆破 - 吸氣讓氣球變大\n   🏃 跑步競賽 - 吸氣讓角色前進\n   🎯 射箭挑戰 - 吸氣控制力度\n   🌊 衝浪高手 - 吸氣製造海浪\n   🚀 火箭發射 - 吸氣讓火箭升空\n   🎪 馬戲團 - 吸氣讓球跳躍\n\n✅ 所有按鈕在未連線時都可以點擊！\n✅ 音效系統已初始化\n✅ 肺部動畫即時反應\n✅ 吸藥粉標準區間：30~90 L/min');
         };
 
         // ====== 身分證驗證 ======
@@ -1168,11 +1296,9 @@
         let reader = null;
         let startTime = null;
 
-        // 測量模式
-        let measureMode = 'inhale'; // 'inhale', 'exhale', 'both'
-        let triggerMode = 'single'; // 'single', 'continuous'
+        let measureMode = 'inhale';
+        let triggerMode = 'single';
 
-        // 吸藥粉標準區間：30 ~ 90 L/min
         const STD_MIN = 30;
         const STD_MAX = 90;
 
@@ -1185,7 +1311,7 @@
         let timerAutoMode = true;
         let timerTriggeredByFlow = false;
 
-        // ====== 遊戲狀態 ======
+        // ====== ★★★ 遊戲狀態 ★★★ ======
         let gameActive = false;
         let gameScore = 0;
         let currentGame = 0;
@@ -1193,6 +1319,51 @@
         let gameProgressVal = 0;
         let gameCompleted = false;
         let gameConsecutiveBreaths = 0;
+
+        // ====== 遊戲設定 ======
+        const GAMES = [{
+            id: 0,
+            name: '氣球爆破',
+            icon: '🎈',
+            char: '🎈',
+            rule: '吸氣讓氣球變大，爆破得分！',
+            desc: '達到目標大小時氣球爆破'
+        }, {
+            id: 1,
+            name: '跑步競賽',
+            icon: '🏃',
+            char: '🏃',
+            rule: '吸氣讓角色往前跑！',
+            desc: '跑得越遠分數越高'
+        }, {
+            id: 2,
+            name: '射箭挑戰',
+            icon: '🎯',
+            char: '🏹',
+            rule: '吸氣控制箭的威力！',
+            desc: '越接近靶心越高分'
+        }, {
+            id: 3,
+            name: '衝浪高手',
+            icon: '🌊',
+            char: '🏄',
+            rule: '吸氣製造海浪！',
+            desc: '浪越高分數越高'
+        }, {
+            id: 4,
+            name: '火箭發射',
+            icon: '🚀',
+            char: '🚀',
+            rule: '吸氣讓火箭升空！',
+            desc: '到達目標高度得分'
+        }, {
+            id: 5,
+            name: '馬戲團',
+            icon: '🎪',
+            char: '🤹',
+            rule: '吸氣讓球跳躍！',
+            desc: '通過障礙物得分'
+        }];
 
         // ====== 性別與標準區間 ======
         function getGenderFromId(id) {
@@ -1204,7 +1375,6 @@
             return gender === 'M' ? '男性' : '女性';
         }
 
-        // ====== 更新性別顯示 ======
         function updateGenderDisplay(gender) {
             const display = document.getElementById('genderDisplay');
             if (gender === 'M') {
@@ -1219,9 +1389,9 @@
             }
         }
 
-        // ====== 更新標準區間 ======
         function updatePersonalizedStandard() {
             const idValue = document.getElementById('patientIdNumber').value.toUpperCase();
+            document.getElementById('patientIdNumber').value = idValue;
             const isValid = validateTaiwanId(idValue);
             const age = parseInt(document.getElementById('patientAge').value);
             const height = parseFloat(document.getElementById('patientHeight').value);
@@ -1231,9 +1401,21 @@
                 gender = getGenderFromId(idValue);
                 currentGender = gender;
                 updateGenderDisplay(gender);
+                document.getElementById('genderFromId').classList.remove('hidden');
+                document.getElementById('statusChip').className = 'status-chip success';
+                document.getElementById('statusChip').textContent = '✅ 身分證正確';
+            } else if (idValue.length > 0) {
+                currentGender = null;
+                updateGenderDisplay(null);
+                document.getElementById('genderFromId').classList.add('hidden');
+                document.getElementById('statusChip').className = 'status-chip error';
+                document.getElementById('statusChip').textContent = '⚠️ 需10碼, 首碼大寫英文, 第二碼1/2';
             } else {
                 currentGender = null;
                 updateGenderDisplay(null);
+                document.getElementById('genderFromId').classList.add('hidden');
+                document.getElementById('statusChip').className = 'status-chip';
+                document.getElementById('statusChip').textContent = isConnected ? '✅ 已連線' : '⚪ 未連接';
             }
 
             const rangeDisplay = document.getElementById('stdRangeValue');
@@ -1257,6 +1439,22 @@
 
             if (currentFlow > 0) {
                 updateFlowStatus(currentFlow);
+            }
+
+            const canSave = isValid && isConnected;
+            document.getElementById('saveBtn').disabled = !canSave;
+            const saveHint = document.getElementById('saveHint');
+            if (!canSave) {
+                if (!isConnected) {
+                    saveHint.textContent = '⚠️ 請先連接裝置';
+                    saveHint.style.color = '#b7950b';
+                } else if (!isValid) {
+                    saveHint.textContent = '⚠️ 請輸入正確身分證';
+                    saveHint.style.color = '#c0392b';
+                }
+            } else {
+                saveHint.textContent = '✅ 可儲存';
+                saveHint.style.color = '#1a7a42';
             }
         }
 
@@ -1290,7 +1488,23 @@
                 flowIndicator.setAttribute('opacity', absFlow > 5 ? '1' : '0');
             }
 
-            updateBreathBall(absFlow);
+            // 更新呼吸球
+            const ball = document.getElementById('breathBall');
+            const flowDisplay = document.getElementById('ballFlowValue');
+            if (ball) {
+                const ballScale = 0.6 + (normalizedFlow / 90) * 0.5;
+                ball.style.transform = `scale(${ballScale})`;
+                const intensity2 = Math.min(normalizedFlow / 50, 1);
+                const r2 = 30 + 60 * intensity2;
+                const g2 = 90 + 80 * intensity2;
+                const b2 = 30 + 40 * intensity2;
+                ball.style.background =
+                    `radial-gradient(circle at 35% 35%, rgb(${r2+50},${g2+50},${b2+50}), rgb(${r2},${g2},${b2}))`;
+                ball.style.boxShadow = `0 0 ${20 + 40 * intensity2}px rgba(46, 204, 113, ${0.1 + 0.3 * intensity2})`;
+            }
+            if (flowDisplay) {
+                flowDisplay.textContent = flow.toFixed(1);
+            }
 
             if (timerAutoMode && absFlow > 5 && !timerRunning) {
                 startTimer();
@@ -1302,28 +1516,10 @@
                     }
                 }, 2000);
             }
-        }
 
-        // ====== 更新呼吸球 ======
-        function updateBreathBall(flow) {
-            const ball = document.getElementById('breathBall');
-            const flowDisplay = document.getElementById('ballFlowValue');
-            if (!ball) return;
-
-            const normalizedFlow = Math.min(Math.abs(flow), 90);
-            const scale = 0.6 + (normalizedFlow / 90) * 0.5;
-            ball.style.transform = `scale(${scale})`;
-
-            const intensity = Math.min(normalizedFlow / 50, 1);
-            const r = 30 + 60 * intensity;
-            const g = 90 + 80 * intensity;
-            const b = 30 + 40 * intensity;
-            ball.style.background =
-                `radial-gradient(circle at 35% 35%, rgb(${r+50},${g+50},${b+50}), rgb(${r},${g},${b}))`;
-            ball.style.boxShadow = `0 0 ${20 + 40 * intensity}px rgba(46, 204, 113, ${0.1 + 0.3 * intensity})`;
-
-            if (flowDisplay) {
-                flowDisplay.textContent = flow.toFixed(1);
+            // ★★★ 更新遊戲視覺 ★★★
+            if (gameActive) {
+                updateGameVisual(absFlow);
             }
         }
 
@@ -1369,62 +1565,15 @@
             }
         }
 
-        // ====== 更新所有連動 ======
-        function updateAllLinkedFields() {
-            const idValue = document.getElementById('patientIdNumber').value.toUpperCase();
-            document.getElementById('patientIdNumber').value = idValue;
-            const isValid = validateTaiwanId(idValue);
-
-            if (isValid) {
-                const gender = getGenderFromId(idValue);
-                currentGender = gender;
-                updateGenderDisplay(gender);
-                document.getElementById('genderFromId').classList.remove('hidden');
-                document.getElementById('statusChip').className = 'status-chip success';
-                document.getElementById('statusChip').textContent = '✅ 身分證正確';
-            } else if (idValue.length > 0) {
-                currentGender = null;
-                updateGenderDisplay(null);
-                document.getElementById('genderFromId').classList.add('hidden');
-                document.getElementById('statusChip').className = 'status-chip error';
-                document.getElementById('statusChip').textContent = '⚠️ 需10碼, 首碼大寫英文, 第二碼1/2';
-            } else {
-                currentGender = null;
-                updateGenderDisplay(null);
-                document.getElementById('genderFromId').classList.add('hidden');
-                document.getElementById('statusChip').className = 'status-chip';
-                document.getElementById('statusChip').textContent = isConnected ? '✅ 已連線' : '⚪ 未連接';
-            }
-
-            updatePersonalizedStandard();
-            updateFlowStatus(currentFlow);
-
-            const canSave = isValid && isConnected;
-            document.getElementById('saveBtn').disabled = !canSave;
-            const saveHint = document.getElementById('saveHint');
-            if (!canSave) {
-                if (!isConnected) {
-                    saveHint.textContent = '⚠️ 請先連接裝置';
-                    saveHint.style.color = '#b7950b';
-                } else if (!isValid) {
-                    saveHint.textContent = '⚠️ 請輸入正確身分證';
-                    saveHint.style.color = '#c0392b';
-                }
-            } else {
-                saveHint.textContent = '✅ 可儲存';
-                saveHint.style.color = '#1a7a42';
-            }
-        }
-
         // ====== 事件綁定 ======
         document.getElementById('patientIdNumber').addEventListener('input', function() {
             this.value = this.value.toUpperCase();
-            updateAllLinkedFields();
+            updatePersonalizedStandard();
         });
-        document.getElementById('patientAge').addEventListener('input', updateAllLinkedFields);
-        document.getElementById('patientAge').addEventListener('change', updateAllLinkedFields);
-        document.getElementById('patientHeight').addEventListener('input', updateAllLinkedFields);
-        document.getElementById('patientHeight').addEventListener('change', updateAllLinkedFields);
+        document.getElementById('patientAge').addEventListener('input', updatePersonalizedStandard);
+        document.getElementById('patientAge').addEventListener('change', updatePersonalizedStandard);
+        document.getElementById('patientHeight').addEventListener('input', updatePersonalizedStandard);
+        document.getElementById('patientHeight').addEventListener('change', updatePersonalizedStandard);
 
         // ====== 圖表初始化 ======
         const ctxChart = document.getElementById('flowChart').getContext('2d');
@@ -1441,17 +1590,9 @@
                         title: { display: true, text: '時間 (秒)' },
                         grid: { color: '#e8f0e8' },
                         min: 0,
-                        ticks: {
-                            stepSize: 1,
-                            maxTicksLimit: 20
-                        }
+                        ticks: { stepSize: 1, maxTicksLimit: 20 }
                     },
-                    y: {
-                        min: 0,
-                        max: 100,
-                        title: { display: true, text: '流量 (L/min)' },
-                        grid: { color: '#e8f0e8' }
-                    }
+                    y: { min: 0, max: 100, title: { display: true, text: '流量 (L/min)' }, grid: { color: '#e8f0e8' } }
                 },
                 plugins: { legend: { display: false } }
             }
@@ -1587,7 +1728,7 @@
                 document.getElementById('statusChip').className = 'status-chip';
                 document.getElementById('statusChip').textContent = '🔌 已斷開';
                 this.textContent = '🔗 連接裝置';
-                updateAllLinkedFields();
+                updatePersonalizedStandard();
                 showModal('🔌 已斷開連接', '裝置已成功中斷連線');
                 return;
             }
@@ -1612,7 +1753,7 @@
                 chartInstance.data.labels = [];
                 chartInstance.data.datasets[0].data = [];
                 chartInstance.update();
-                updateAllLinkedFields();
+                updatePersonalizedStandard();
                 listenSerial();
                 playSound('gameStart');
                 showModal('✅ 連線成功', '裝置已成功連接！');
@@ -1644,13 +1785,10 @@
             if (match) {
                 let flow = parseFloat(match[1]);
 
-                // ★★★ 根據模式處理流量方向 ★★★
                 if (measureMode === 'exhale') {
-                    flow = -Math.abs(flow); // 吐氣顯示負值
-                } else if (measureMode === 'both') {
-                    // 雙向模式：保持原值（正負都顯示）
+                    flow = -Math.abs(flow);
                 }
-                // inhale 模式：保持正值
+                // both 模式保持原值
 
                 currentFlow = flow;
 
@@ -1683,31 +1821,417 @@
             }
         }
 
-        // ====== ★★★ 全部重置 ★★★ ======
+        // ====== ★★★ 遊戲視覺更新 ★★★ ======
+        function updateGameVisual(flow) {
+            const absFlow = Math.abs(flow);
+            const char = document.getElementById('gameChar');
+            const track = document.getElementById('trackProgress');
+            const target = document.getElementById('targetMarker');
+
+            if (!char) return;
+
+            // 根據不同遊戲更新視覺
+            switch (currentGame) {
+                case 0: // 氣球爆破
+                    const balloonSize = 24 + Math.min(absFlow / 90, 1) * 50;
+                    char.style.fontSize = balloonSize + 'px';
+                    char.style.bottom = (10 + Math.min(absFlow / 90, 1) * 30) + 'px';
+                    if (absFlow > 0.5) {
+                        char.textContent = Math.random() > 0.98 ? '💥' : '🎈';
+                    }
+                    break;
+
+                case 1: // 跑步競賽
+                    const runProgress = Math.min((absFlow / 90) * 100, 100);
+                    char.style.left = Math.min(runProgress, 85) + '%';
+                    if (absFlow > 5) {
+                        char.textContent = '🏃';
+                        char.style.transform = 'scaleX(1)';
+                    } else {
+                        char.style.transform = 'scaleX(1)';
+                    }
+                    track.style.width = Math.min((absFlow / 90) * 100, 100) + '%';
+                    break;
+
+                case 2: // 射箭挑戰
+                    const power = Math.min(absFlow / 90, 1);
+                    const angle = -30 + power * 60;
+                    char.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+                    char.style.bottom = (10 + power * 40) + 'px';
+                    if (absFlow > 0.5) {
+                        char.textContent = '🏹';
+                    }
+                    break;
+
+                case 3: // 衝浪高手
+                    const waveHeight = Math.min(absFlow / 90, 1) * 50;
+                    const container = document.getElementById('waveContainer');
+                    if (container) {
+                        container.classList.remove('hidden');
+                        const waves = container.querySelectorAll('.wave');
+                        waves.forEach((w, i) => {
+                            w.style.height = (30 + waveHeight * (0.6 + i * 0.2)) + '%';
+                            w.style.opacity = 0.3 + (absFlow / 90) * 0.5;
+                        });
+                    }
+                    char.style.bottom = (10 + waveHeight * 0.5) + 'px';
+                    char.style.transform = `rotate(${absFlow / 90 * 15 - 5}deg)`;
+                    if (absFlow > 0.5) {
+                        char.textContent = '🏄';
+                    }
+                    break;
+
+                case 4: // 火箭發射
+                    const height = Math.min(absFlow / 90, 1) * 70;
+                    char.style.bottom = (10 + height) + 'px';
+                    if (absFlow > 0.5) {
+                        char.textContent = '🚀';
+                        char.style.transform = `translateX(-50%) rotate(${-absFlow / 90 * 10}deg)`;
+                    }
+                    track.style.width = Math.min((absFlow / 90) * 100, 100) + '%';
+                    break;
+
+                case 5: // 馬戲團
+                    const jumpHeight = Math.min(absFlow / 90, 1) * 50;
+                    char.style.bottom = (10 + jumpHeight) + 'px';
+                    if (absFlow > 0.5) {
+                        char.textContent = Math.random() > 0.95 ? '⭐' : '🤹';
+                    }
+                    // 添加小球
+                    const ballDiv = document.querySelector('.game-ball-extra');
+                    if (!ballDiv && absFlow > 10) {
+                        const extra = document.createElement('div');
+                        extra.className = 'game-char game-ball-extra';
+                        extra.textContent = '⚪';
+                        extra.style.cssText =
+                            `position:absolute; font-size:20px; left:${30+Math.random()*40}%; bottom:${20+Math.random()*30}px; z-index:1; opacity:0.7; animation: none;`;
+                        document.getElementById('gameVisual').appendChild(extra);
+                        setTimeout(() => extra.remove(), 800);
+                    }
+                    break;
+            }
+
+            // 更新目標標記位置
+            if (target && gameTarget > 0) {
+                const targetPos = Math.min((gameTarget / 90) * 80 + 5, 85);
+                target.style.left = targetPos + '%';
+            }
+        }
+
+        // ====== ★★★ 遊戲邏輯 ★★★ ======
+        function processGame(flow) {
+            const absFlow = Math.abs(flow);
+            if (absFlow < 0.5) return;
+
+            let points = 0;
+            let progress = 0;
+            const target = gameTarget;
+            let feedbackMsg = '';
+            let scored = false;
+
+            switch (currentGame) {
+                case 0: // 氣球爆破
+                    if (absFlow >= target) {
+                        points = 15;
+                        progress = 100;
+                        feedbackMsg = '🎈 爆破！+15分！';
+                        scored = true;
+                        playSound('burst');
+                        // 爆破特效
+                        const visual = document.getElementById('gameVisual');
+                        const burst = document.createElement('div');
+                        burst.className = 'balloon-burst';
+                        burst.textContent = '💥';
+                        burst.style.left = '50%';
+                        burst.style.top = '30%';
+                        burst.style.transform = 'translateX(-50%)';
+                        visual.appendChild(burst);
+                        setTimeout(() => burst.remove(), 600);
+                    } else {
+                        progress = Math.min((absFlow / target) * 90, 90);
+                        feedbackMsg = `🎈 氣球 ${Math.round(progress)}%`;
+                    }
+                    break;
+
+                case 1: // 跑步競賽
+                    progress = Math.min((absFlow / target) * 100, 100);
+                    if (progress >= 100) {
+                        points = 10;
+                        feedbackMsg = '🏃 抵達終點！+10分！';
+                        scored = true;
+                        playSound('goal');
+                    } else {
+                        feedbackMsg = `🏃 跑了 ${Math.round(progress)}%`;
+                    }
+                    break;
+
+                case 2: // 射箭挑戰
+                    const accuracy = 100 - Math.abs(absFlow - target) / target * 100;
+                    progress = Math.min(Math.max(accuracy, 0), 100);
+                    if (progress >= 90) {
+                        points = 20;
+                        feedbackMsg = '🎯 正中靶心！+20分！';
+                        scored = true;
+                        playSound('bigScore');
+                    } else if (progress >= 60) {
+                        points = 10;
+                        feedbackMsg = '🎯 不錯！+10分！';
+                        scored = true;
+                        playSound('score');
+                    } else {
+                        feedbackMsg = `🎯 準確度 ${Math.round(progress)}%`;
+                    }
+                    break;
+
+                case 3: // 衝浪高手
+                    progress = Math.min((absFlow / target) * 100, 100);
+                    if (progress >= 100) {
+                        points = 12;
+                        feedbackMsg = '🌊 巨浪！+12分！';
+                        scored = true;
+                        playSound('score');
+                    } else {
+                        feedbackMsg = `🌊 浪高 ${Math.round(progress)}%`;
+                    }
+                    break;
+
+                case 4: // 火箭發射
+                    progress = Math.min((absFlow / target) * 100, 100);
+                    if (progress >= 100) {
+                        points = 15;
+                        feedbackMsg = '🚀 升空成功！+15分！';
+                        scored = true;
+                        playSound('goal');
+                    } else {
+                        feedbackMsg = `🚀 高度 ${Math.round(progress)}%`;
+                    }
+                    break;
+
+                case 5: // 馬戲團
+                    gameConsecutiveBreaths++;
+                    progress = Math.min((gameConsecutiveBreaths / 15) * 100, 100);
+                    if (gameConsecutiveBreaths % 5 === 0 && absFlow > 5) {
+                        points = 8;
+                        feedbackMsg = '🎪 完美跳躍！+8分！';
+                        scored = true;
+                        playSound('score');
+                    } else {
+                        feedbackMsg = `🎪 跳躍 ${gameConsecutiveBreaths} 次`;
+                    }
+                    break;
+            }
+
+            if (scored) {
+                gameScore += points;
+                document.getElementById('gameScoreValue').textContent = gameScore;
+                document.getElementById('gameFeedback').textContent = feedbackMsg;
+                document.getElementById('gameFeedback').className = 'game-feedback-text highlight';
+                setTimeout(() => {
+                    if (gameActive) {
+                        document.getElementById('gameFeedback').className = 'game-feedback-text';
+                        document.getElementById('gameFeedback').textContent = '💪 繼續呼吸！';
+                    }
+                }, 1500);
+            } else {
+                document.getElementById('gameFeedback').textContent = feedbackMsg;
+                document.getElementById('gameFeedback').className = 'game-feedback-text';
+            }
+
+            // 更新進度
+            gameProgressVal = Math.min(progress, 100);
+            document.getElementById('gameProgressFill').style.width = gameProgressVal + '%';
+            document.getElementById('gameProgressText').textContent = Math.round(gameProgressVal) + '%';
+
+            // 更新目標顯示
+            if (gameActive && absFlow > 0.5) {
+                if (absFlow >= target) {
+                    document.getElementById('gameTargetDisplay').textContent =
+                    `🎯 已達標！ (${absFlow.toFixed(1)}/${target})`;
+                } else {
+                    document.getElementById('gameTargetDisplay').textContent =
+                        `🎯 還差 ${(target - absFlow).toFixed(1)} L/min (${absFlow.toFixed(1)}/${target})`;
+                }
+            }
+
+            // 目標達成
+            if (gameProgressVal >= 95 && !gameCompleted) {
+                gameCompleted = true;
+                playSound('goal');
+                showModal('🎉 目標達成！', `太棒了！獲得 ${gameScore} 分！\n繼續呼吸可以累積更多分數！`);
+                document.getElementById('gameFeedback').textContent = '🎉 目標達成！繼續累積分數！';
+                document.getElementById('gameFeedback').className = 'game-feedback-text highlight';
+            }
+        }
+
+        // ====== ★★★ 遊戲控制 ★★★ ======
+        document.getElementById('gameModeBtn').onclick = function() {
+            playSound('click');
+            gameActive = !gameActive;
+
+            if (gameActive) {
+                currentGame = Math.floor(Math.random() * 6);
+                const game = GAMES[currentGame];
+                gameTarget = (20 + Math.random() * 60);
+                gameTarget = Math.round(gameTarget * 10) / 10;
+                gameScore = 0;
+                gameProgressVal = 0;
+                gameCompleted = false;
+                gameConsecutiveBreaths = 0;
+
+                // 更新 UI
+                document.getElementById('gameIcon').textContent = game.icon;
+                document.getElementById('gameNameDisplay').textContent = game.name;
+                document.getElementById('gameRuleDisplay').textContent = game.rule;
+                document.getElementById('gameStatusBadge').textContent = '▶ 進行中';
+                document.getElementById('gameStatusBadge').className = 'game-status-badge active';
+                document.getElementById('gameScoreValue').textContent = '0';
+                document.getElementById('gameTargetDisplay').textContent = `🎯 目標: ${gameTarget} L/min`;
+                document.getElementById('gameProgressFill').style.width = '0%';
+                document.getElementById('gameProgressText').textContent = '0%';
+                document.getElementById('gameFeedback').textContent = '💪 開始呼吸！加油！';
+                document.getElementById('gameFeedback').className = 'game-feedback-text highlight';
+                this.textContent = '⏹️ 結束遊戲';
+                document.getElementById('gameNextBtn').style.display = 'inline-block';
+
+                // 重置遊戲角色
+                const char = document.getElementById('gameChar');
+                const track = document.getElementById('trackProgress');
+                const waveContainer = document.getElementById('waveContainer');
+                if (char) {
+                    char.textContent = game.char;
+                    char.className = 'game-char';
+                    char.style.cssText = '';
+                    // 根據遊戲設定不同位置
+                    if (currentGame === 1) {
+                        char.classList.add('runner');
+                        char.style.left = '10px';
+                    } else if (currentGame === 4) {
+                        char.classList.add('rocket');
+                        char.style.bottom = '10px';
+                    } else if (currentGame === 3) {
+                        char.classList.add('surfer');
+                        char.style.left = '10%';
+                        char.style.bottom = '10px';
+                    } else {
+                        char.style.left = '50%';
+                        char.style.transform = 'translateX(-50%)';
+                        char.style.bottom = '10px';
+                    }
+                }
+                if (track) track.style.width = '0%';
+                if (waveContainer) waveContainer.classList.add('hidden');
+
+                // 移除舊的特效
+                document.querySelectorAll('.balloon-burst, .game-ball-extra').forEach(el => el.remove());
+
+                playSound('gameStart');
+                showModal('🎮 遊戲開始',
+                    `${game.icon} ${game.name}\n${game.desc}\n目標流量: ${gameTarget} L/min\n\n開始呼吸吧！`);
+            } else {
+                document.getElementById('gameStatusBadge').textContent = '● 已關閉';
+                document.getElementById('gameStatusBadge').className = 'game-status-badge';
+                document.getElementById('gameFeedback').className = 'game-feedback-text';
+                document.getElementById('gameFeedback').textContent = '💪 點擊「開啟遊戲」開始挑戰！';
+                this.textContent = '🎮 開啟遊戲';
+                document.getElementById('gameNextBtn').style.display = 'none';
+
+                // 重置視覺
+                const char = document.getElementById('gameChar');
+                const track = document.getElementById('trackProgress');
+                const waveContainer = document.getElementById('waveContainer');
+                if (char) {
+                    char.textContent = '🎈';
+                    char.className = 'game-char balloon';
+                    char.style.cssText =
+                        'left:50%; transform:translateX(-50%); bottom:10px; font-size:30px; transition:all 0.2s ease;';
+                }
+                if (track) track.style.width = '0%';
+                if (waveContainer) waveContainer.classList.add('hidden');
+                document.querySelectorAll('.balloon-burst, .game-ball-extra').forEach(el => el.remove());
+
+                if (gameScore > 0) {
+                    playSound('gameOver');
+                    showModal('🏁 遊戲結束',
+                        `最終分數: ${gameScore} 分\n${gameScore > 50 ? '🌟 優異表現！' : gameScore > 20 ? '👍 不錯喔！' : '💪 繼續加油！'}`);
+                }
+            }
+        };
+
+        document.getElementById('gameNextBtn').onclick = function() {
+            playSound('click');
+            if (!gameActive) return;
+
+            currentGame = (currentGame + 1) % 6;
+            const game = GAMES[currentGame];
+            gameTarget = (20 + Math.random() * 60);
+            gameTarget = Math.round(gameTarget * 10) / 10;
+            gameScore = 0;
+            gameProgressVal = 0;
+            gameCompleted = false;
+            gameConsecutiveBreaths = 0;
+
+            document.getElementById('gameIcon').textContent = game.icon;
+            document.getElementById('gameNameDisplay').textContent = game.name;
+            document.getElementById('gameRuleDisplay').textContent = game.rule;
+            document.getElementById('gameScoreValue').textContent = '0';
+            document.getElementById('gameTargetDisplay').textContent = `🎯 目標: ${gameTarget} L/min`;
+            document.getElementById('gameProgressFill').style.width = '0%';
+            document.getElementById('gameProgressText').textContent = '0%';
+            document.getElementById('gameFeedback').textContent = `🔄 換到 ${game.name}！開始！`;
+            document.getElementById('gameFeedback').className = 'game-feedback-text highlight';
+
+            // 重置遊戲角色
+            const char = document.getElementById('gameChar');
+            const track = document.getElementById('trackProgress');
+            const waveContainer = document.getElementById('waveContainer');
+            if (char) {
+                char.textContent = game.char;
+                char.className = 'game-char';
+                char.style.cssText = '';
+                if (currentGame === 1) {
+                    char.classList.add('runner');
+                    char.style.left = '10px';
+                } else if (currentGame === 4) {
+                    char.classList.add('rocket');
+                    char.style.bottom = '10px';
+                } else if (currentGame === 3) {
+                    char.classList.add('surfer');
+                    char.style.left = '10%';
+                    char.style.bottom = '10px';
+                } else {
+                    char.style.left = '50%';
+                    char.style.transform = 'translateX(-50%)';
+                    char.style.bottom = '10px';
+                }
+            }
+            if (track) track.style.width = '0%';
+            if (waveContainer) waveContainer.classList.add('hidden');
+            document.querySelectorAll('.balloon-burst, .game-ball-extra').forEach(el => el.remove());
+
+            playSound('click');
+            showModal('🔄 換遊戲', `${game.icon} ${game.name}\n${game.desc}\n目標流量: ${gameTarget} L/min`);
+        };
+
+        // ====== 全部重置 ======
         document.getElementById('resetBtn').onclick = function() {
             playSound('click');
 
-            // 1. 清除數據
             flowData = [];
             peakFlowValue = 0;
             currentFlow = 0;
 
-            // 2. 清除圖表
             chartInstance.data.labels = [];
             chartInstance.data.datasets[0].data = [];
             chartInstance.update();
 
-            // 3. 重置顯示
             document.getElementById('flowValue').textContent = '0.00';
             document.getElementById('peakHold').textContent = '0.00';
             drawGauge(0, 0);
 
-            // 4. 重置肺部
             document.getElementById('leftLungFill').setAttribute('transform', 'scale(0.50)');
             document.getElementById('rightLungFill').setAttribute('transform', 'scale(0.50)');
             document.getElementById('flowIndicator').setAttribute('opacity', '0');
 
-            // 5. 重置呼吸球
             const breathBall = document.getElementById('breathBall');
             if (breathBall) {
                 breathBall.style.transform = 'scale(1)';
@@ -1715,24 +2239,19 @@
             }
             document.getElementById('ballFlowValue').textContent = '0.0';
 
-            // 6. 重置燈號
             document.getElementById('light1').className = 'light';
             document.getElementById('light2').className = 'light';
             document.getElementById('light3').className = 'light';
 
-            // 7. 重置流量狀態
             const indicator = document.getElementById('flowStatusIndicator');
             indicator.className = 'status-indicator grey';
             indicator.textContent = '⚪ 等待測量';
             document.getElementById('flowStatusDetail').textContent = '-';
 
-            // 8. 重置步驟
             setStep(0);
-
-            // 9. 重置計時器
             resetTimer();
 
-            // 10. 重置遊戲
+            // 重置遊戲
             gameActive = false;
             gameScore = 0;
             gameProgressVal = 0;
@@ -1742,19 +2261,31 @@
             document.getElementById('gameStatusBadge').className = 'game-status-badge';
             document.getElementById('gameScoreValue').textContent = '0';
             document.getElementById('gameModeBtn').textContent = '🎮 開啟遊戲';
-            document.getElementById('gameNameDisplay').textContent = '目標挑戰';
-            document.getElementById('gameNameDisplay').classList.add('hidden');
-            document.getElementById('gameRuleDisplay').textContent = '點擊「開啟遊戲」開始';
+            document.getElementById('gameNameDisplay').textContent = '氣球爆破';
+            document.getElementById('gameRuleDisplay').textContent = '吸氣讓氣球變大，爆破得分！';
             document.getElementById('gameTargetDisplay').textContent = '🎯 目標: --';
             document.getElementById('gameProgressFill').style.width = '0%';
             document.getElementById('gameProgressText').textContent = '0%';
             document.getElementById('gameFeedback').textContent = '💪 點擊「開啟遊戲」開始挑戰！';
             document.getElementById('gameFeedback').className = 'game-feedback-text';
             document.getElementById('gameNextBtn').style.display = 'none';
-            document.getElementById('gameIcon').textContent = '🎯';
-            document.getElementById('gameProgress').classList.add('hidden');
+            document.getElementById('gameIcon').textContent = '🎈';
 
-            // 11. 重置模式（回到吸氣 + 單次）
+            // 重置視覺
+            const char = document.getElementById('gameChar');
+            const track = document.getElementById('trackProgress');
+            const waveContainer = document.getElementById('waveContainer');
+            if (char) {
+                char.textContent = '🎈';
+                char.className = 'game-char balloon';
+                char.style.cssText =
+                    'left:50%; transform:translateX(-50%); bottom:10px; font-size:30px; transition:all 0.2s ease;';
+            }
+            if (track) track.style.width = '0%';
+            if (waveContainer) waveContainer.classList.add('hidden');
+            document.querySelectorAll('.balloon-burst, .game-ball-extra').forEach(el => el.remove());
+
+            // 重置模式
             document.querySelectorAll('#modeInhale,#modeExhale,#modeBoth').forEach(b => b.className =
             'btn btn-sm btn-outline');
             document.getElementById('modeInhale').className = 'btn btn-sm btn-active';
@@ -1765,11 +2296,8 @@
             document.getElementById('modeSingle').className = 'btn btn-sm btn-active';
             triggerMode = 'single';
 
-            // 12. 清空病患編號
             document.getElementById('patientId').value = '';
-
-            // 13. 更新所有連動
-            updateAllLinkedFields();
+            updatePersonalizedStandard();
 
             showModal('🔄 全部重置完成', '所有數據已清除，所有狀態已恢復初始值\n\n✅ 圖表已清空\n✅ 燈號已復位\n✅ 肺部已縮回\n✅ 計時器已重置\n✅ 遊戲已關閉\n✅ 模式已回到預設 (吸氣+單次)\n\n💡 裝置仍保持連線');
         };
@@ -1858,7 +2386,7 @@
             showModal('✅ 套用完成', `Y軸範圍: ${min} ~ ${max}`);
         };
 
-        // ====== ★★★ 模式切換（全部可使用，不鎖功能）★★★ ======
+        // ====== 模式切換 ======
         document.getElementById('modeInhale').onclick = function() {
             playSound('click');
             document.querySelectorAll('#modeInhale,#modeExhale,#modeBoth').forEach(b => b.className =
@@ -2061,16 +2589,7 @@
             }
         };
 
-        // ====== 遊戲模式 ======
-        const games = [
-            { id: 0, name: '目標挑戰', icon: '🎯', desc: '達到目標流量', rule: '吸氣達到目標值即可得分' },
-            { id: 1, name: '穩定維持', icon: '📈', desc: '維持在目標區間', rule: '保持流量在目標±8範圍內' },
-            { id: 2, name: '爆發力', icon: '⚡', desc: '衝刺最高流量', rule: '衝刺達到峰值得高分' },
-            { id: 3, name: '節奏呼吸', icon: '🔄', desc: '規律吸吐交替', rule: '每8次呼吸得一分' },
-            { id: 4, name: '累積積分', icon: '🏆', desc: '每次吸氣得分', rule: '每次吸氣都獲得分數' },
-            { id: 5, name: '幸運呼吸', icon: '🎲', desc: '隨機驚喜加成', rule: '有機會觸發幸運加成' }
-        ];
-
+        // ====== 遊戲粒子 ======
         function initParticles() {
             const container = document.getElementById('gameParticles');
             container.innerHTML = '';
@@ -2087,191 +2606,6 @@
             }
         }
         initParticles();
-
-        document.getElementById('gameModeBtn').onclick = function() {
-            playSound('click');
-            gameActive = !gameActive;
-
-            if (gameActive) {
-                currentGame = Math.floor(Math.random() * 6);
-                gameTarget = (20 + Math.random() * 60);
-                gameTarget = Math.round(gameTarget * 10) / 10;
-                gameScore = 0;
-                gameProgressVal = 0;
-                gameCompleted = false;
-                gameConsecutiveBreaths = 0;
-
-                const game = games[currentGame];
-                document.getElementById('gameIcon').textContent = game.icon;
-                document.getElementById('gameNameDisplay').textContent = game.name;
-                document.getElementById('gameNameDisplay').classList.remove('hidden');
-                document.getElementById('gameStatusBadge').textContent = '▶ 進行中';
-                document.getElementById('gameStatusBadge').className = 'game-status-badge active';
-                document.getElementById('gameScoreValue').textContent = '0';
-                document.getElementById('gameTargetDisplay').textContent = `🎯 目標: ${gameTarget} L/min`;
-                document.getElementById('gameProgressFill').style.width = '0%';
-                document.getElementById('gameProgressText').textContent = '0%';
-                document.getElementById('gameProgress').classList.remove('hidden');
-                document.getElementById('gameRuleDisplay').textContent = game.rule;
-                document.getElementById('gameFeedback').textContent = '💪 開始呼吸！加油！';
-                document.getElementById('gameFeedback').className = 'game-feedback-text highlight';
-                this.textContent = '⏹️ 結束遊戲';
-                document.getElementById('gameNextBtn').style.display = 'inline-block';
-
-                playSound('gameStart');
-                showModal('🎮 遊戲開始', `${game.icon} ${game.name}\n${game.desc}\n目標流量: ${gameTarget} L/min\n\n開始測量吧！`);
-            } else {
-                document.getElementById('gameStatusBadge').textContent = '● 已關閉';
-                document.getElementById('gameStatusBadge').className = 'game-status-badge';
-                document.getElementById('gameFeedback').className = 'game-feedback-text';
-                document.getElementById('gameFeedback').textContent = '💪 點擊「開啟遊戲」開始挑戰！';
-                this.textContent = '🎮 開啟遊戲';
-                document.getElementById('gameNextBtn').style.display = 'none';
-
-                if (gameScore > 0) {
-                    playSound('gameOver');
-                    showModal('🏁 遊戲結束', `最終分數: ${gameScore} 分\n${gameScore > 50 ? '🌟 優異表現！' : gameScore > 20 ? '👍 不錯喔！' : '💪 繼續加油！'}`);
-                }
-            }
-        };
-
-        document.getElementById('gameNextBtn').onclick = function() {
-            playSound('click');
-            if (!gameActive) return;
-
-            currentGame = (currentGame + 1) % 6;
-            gameTarget = (20 + Math.random() * 60);
-            gameTarget = Math.round(gameTarget * 10) / 10;
-            gameScore = 0;
-            gameProgressVal = 0;
-            gameCompleted = false;
-            gameConsecutiveBreaths = 0;
-
-            const game = games[currentGame];
-            document.getElementById('gameIcon').textContent = game.icon;
-            document.getElementById('gameNameDisplay').textContent = game.name;
-            document.getElementById('gameScoreValue').textContent = '0';
-            document.getElementById('gameTargetDisplay').textContent = `🎯 目標: ${gameTarget} L/min`;
-            document.getElementById('gameProgressFill').style.width = '0%';
-            document.getElementById('gameProgressText').textContent = '0%';
-            document.getElementById('gameRuleDisplay').textContent = game.rule;
-            document.getElementById('gameFeedback').textContent = `🔄 換到 ${game.name}！開始！`;
-            document.getElementById('gameFeedback').className = 'game-feedback-text highlight';
-
-            playSound('click');
-            showModal('🔄 換遊戲', `${game.icon} ${game.name}\n${game.desc}\n目標流量: ${gameTarget} L/min`);
-        };
-
-        function processGame(flow) {
-            const absFlow = Math.abs(flow);
-            if (absFlow < 0.5) return;
-
-            let points = 0;
-            let progress = 0;
-            const target = gameTarget;
-            let feedbackMsg = '';
-
-            switch (currentGame) {
-                case 0:
-                    if (absFlow >= target) {
-                        points = 15;
-                        progress = Math.min(100, (absFlow / target) * 100);
-                        feedbackMsg = '🎯 達標！+15分！';
-                    } else {
-                        progress = Math.min(90, (absFlow / target) * 90);
-                        feedbackMsg = `💪 還差 ${(target - absFlow).toFixed(1)} L/min`;
-                    }
-                    break;
-                case 1:
-                    if (absFlow >= target - 8 && absFlow <= target + 8) {
-                        points = 8;
-                        progress = Math.min(100, (absFlow / target) * 100);
-                        feedbackMsg = '📈 穩定！+8分！';
-                    } else {
-                        progress = Math.min(70, (absFlow / target) * 70);
-                        feedbackMsg = `📈 目標 ${target}，目前 ${absFlow.toFixed(1)}`;
-                    }
-                    break;
-                case 2:
-                    if (absFlow > peakFlowValue * 0.85 && peakFlowValue > 5) {
-                        points = 12;
-                        progress = Math.min(100, (absFlow / 100) * 100);
-                        feedbackMsg = '⚡ 爆發！+12分！';
-                    } else {
-                        progress = Math.min(80, (absFlow / 100) * 80);
-                        feedbackMsg = `⚡ 峰值 ${peakFlowValue.toFixed(1)} L/min`;
-                    }
-                    break;
-                case 3:
-                    gameConsecutiveBreaths++;
-                    if (gameConsecutiveBreaths % 8 === 0 && absFlow > 5) {
-                        points = 6;
-                        progress = Math.min(100, (gameConsecutiveBreaths / 80) * 100);
-                        feedbackMsg = '🔄 節奏讚！+6分！';
-                    } else {
-                        progress = Math.min(60, (gameConsecutiveBreaths / 80) * 60);
-                        feedbackMsg = `🔄 第 ${gameConsecutiveBreaths} 次呼吸`;
-                    }
-                    break;
-                case 4:
-                    points = Math.floor(absFlow * 0.3);
-                    progress = Math.min(100, (gameScore / 100) * 100);
-                    feedbackMsg = `🏆 +${points}分！`;
-                    break;
-                case 5:
-                    if (Math.random() > 0.65) {
-                        points = 20;
-                        feedbackMsg = '🎲 幸運！+20分！';
-                        playSound('bigScore');
-                    } else {
-                        feedbackMsg = '🎲 繼續呼吸...';
-                    }
-                    progress = Math.min(100, (flowData.length / 30) * 100);
-                    break;
-            }
-
-            if (points > 0) {
-                gameScore += points;
-                document.getElementById('gameScoreValue').textContent = gameScore;
-                if (points >= 10) playSound('score');
-                if (points >= 20) playSound('bigScore');
-                document.getElementById('gameFeedback').textContent = feedbackMsg;
-                document.getElementById('gameFeedback').className = 'game-feedback-text highlight';
-                setTimeout(() => {
-                    if (gameActive) {
-                        document.getElementById('gameFeedback').className = 'game-feedback-text';
-                        document.getElementById('gameFeedback').textContent = '💪 繼續呼吸！';
-                    }
-                }, 1200);
-            } else {
-                document.getElementById('gameFeedback').textContent = feedbackMsg;
-                document.getElementById('gameFeedback').className = 'game-feedback-text';
-            }
-
-            gameProgressVal = Math.min(100, progress);
-            document.getElementById('gameProgressFill').style.width = gameProgressVal + '%';
-            document.getElementById('gameProgressText').textContent = Math.round(gameProgressVal) + '%';
-
-            updateBreathBall(absFlow);
-
-            if (gameProgressVal >= 95 && !gameCompleted) {
-                gameCompleted = true;
-                playSound('goal');
-                showModal('🎉 目標達成！', `太棒了！獲得 ${gameScore} 分！\n繼續呼吸可以累積更多分數！`);
-                document.getElementById('gameFeedback').textContent = '🎉 目標達成！繼續累積分數！';
-                document.getElementById('gameFeedback').className = 'game-feedback-text highlight';
-            }
-
-            if (gameActive && absFlow > 0.5) {
-                if (absFlow >= target) {
-                    document.getElementById('gameTargetDisplay').textContent =
-                    `🎯 已達標！ (${absFlow.toFixed(1)}/${target})`;
-                } else {
-                    document.getElementById('gameTargetDisplay').textContent =
-                        `🎯 還差 ${(target - absFlow).toFixed(1)} L/min (${absFlow.toFixed(1)}/${target})`;
-                }
-            }
-        }
 
         // ====== Modal ======
         function showModal(title, msg) {
@@ -2296,15 +2630,19 @@
         setStep(0);
         drawGauge(0, 0);
         updateLungs(0);
-        updateAllLinkedFields();
+        updatePersonalizedStandard();
         resetTimer();
         initAudio();
 
         console.log('✅ 系統已初始化');
+        console.log('🎮 六款全新互動遊戲已載入：');
+        console.log('   🎈 氣球爆破 - 吸氣讓氣球變大爆破');
+        console.log('   🏃 跑步競賽 - 吸氣讓角色往前跑');
+        console.log('   🎯 射箭挑戰 - 吸氣控制箭的威力');
+        console.log('   🌊 衝浪高手 - 吸氣製造海浪');
+        console.log('   🚀 火箭發射 - 吸氣讓火箭升空');
+        console.log('   🎪 馬戲團 - 吸氣讓球跳躍');
         console.log('💊 吸藥粉標準區間：30 ~ 90 L/min');
-        console.log('⏱️ 圖表X軸會正確顯示時間 (從連線開始計算)');
-        console.log('🔄 全部重置：恢復所有狀態到初始值');
-        console.log('✅ 吐氣/雙向模式皆可使用（不鎖功能）');
         console.log('📋 本系統為輔助參考，異常請諮詢醫師');
     </script>
 </body>
